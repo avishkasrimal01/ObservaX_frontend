@@ -526,36 +526,36 @@ export function AdminPanelView({
               {activeSection === "overview" ? (
                 <>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-lg border bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-gray-500">Total Websites</p>
-                      <p className="mt-1 text-2xl font-semibold text-gray-900">{totalWebsites}</p>
+                    <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Total Websites</p>
+                      <p className="mt-2 text-4xl font-extrabold leading-none tracking-tight text-slate-900">{totalWebsites}</p>
                     </div>
-                    <div className="rounded-lg border bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-gray-500">Monitoring Enabled</p>
-                      <p className="mt-1 text-2xl font-semibold text-gray-900">{activeMonitoring}</p>
+                    <div className="rounded-xl border border-cyan-200 bg-gradient-to-br from-cyan-50 to-white p-4 shadow-sm">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-cyan-700">Monitoring Enabled</p>
+                      <p className="mt-2 text-4xl font-extrabold leading-none tracking-tight text-cyan-900">{activeMonitoring}</p>
                     </div>
-                    <div className="rounded-lg border bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-red-600">Down</p>
-                      <p className="mt-1 text-2xl font-semibold text-red-700">{downWebsites}</p>
+                    <div className="rounded-xl border border-red-200 bg-gradient-to-br from-red-50 to-white p-4 shadow-sm">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-red-700">Down</p>
+                      <p className="mt-2 text-4xl font-extrabold leading-none tracking-tight text-red-700">{downWebsites}</p>
                     </div>
-                    <div className="rounded-lg border bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-amber-600">Degraded</p>
-                      <p className="mt-1 text-2xl font-semibold text-amber-700">{degradedWebsites}</p>
+                    <div className="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4 shadow-sm">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-amber-700">Degraded</p>
+                      <p className="mt-2 text-4xl font-extrabold leading-none tracking-tight text-amber-700">{degradedWebsites}</p>
                     </div>
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-lg border bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-gray-500">Total Accounts</p>
-                      <p className="mt-1 text-2xl font-semibold text-gray-900">{users.length}</p>
+                    <div className="rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-white p-4 shadow-sm">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-indigo-700">Total Accounts</p>
+                      <p className="mt-2 text-4xl font-extrabold leading-none tracking-tight text-indigo-900">{users.length}</p>
                     </div>
-                    <div className="rounded-lg border bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-gray-500">Total Payments</p>
-                      <p className="mt-1 text-2xl font-semibold text-gray-900">{payments.length}</p>
+                    <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 shadow-sm">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-emerald-700">Total Payments</p>
+                      <p className="mt-2 text-4xl font-extrabold leading-none tracking-tight text-emerald-900">{payments.length}</p>
                     </div>
-                    <div className="rounded-lg border bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-gray-500">Total Revenue</p>
-                      <p className="mt-1 text-2xl font-semibold text-gray-900">{totalRevenueLabel}</p>
+                    <div className="rounded-xl border border-teal-200 bg-gradient-to-br from-teal-50 to-white p-4 shadow-sm">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-teal-700">Total Revenue</p>
+                      <p className="mt-2 text-4xl font-extrabold leading-none tracking-tight text-teal-900">{totalRevenueLabel}</p>
                     </div>
                   </div>
 
