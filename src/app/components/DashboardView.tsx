@@ -117,39 +117,39 @@ export function DashboardView({ websites }: DashboardViewProps) {
     });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900">Dashboard Overview</h2>
+          <h2 className="text-xl font-semibold text-gray-900 sm:text-2xl">Dashboard Overview</h2>
           <p className="text-sm text-gray-600">Monitor your web applications in real-time</p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white/80 px-4 py-2 text-right shadow-sm">
+        <div className="w-full rounded-lg border border-gray-200 bg-white/80 px-4 py-2 text-left shadow-sm sm:w-auto sm:text-right">
           <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Current Date & Time</p>
           <p className="text-xs font-semibold text-gray-700">{formattedDate}</p>
-          <p className="text-lg font-semibold text-blue-700">{formattedTime}</p>
+          <p className="text-base font-semibold text-blue-700 sm:text-lg">{formattedTime}</p>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, index) => (
           <StatCard key={index} {...stat} />
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <TrendingUp className="h-5 w-5 text-blue-600" />
               Response Time (24h)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={220}>
               <LineChart data={performanceData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="time" stroke="#888" fontSize={12} />
-                <YAxis stroke="#888" fontSize={12} />
+                <XAxis dataKey="time" stroke="#888" fontSize={12} minTickGap={20} />
+                <YAxis stroke="#888" fontSize={12} width={36} />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'white', 
@@ -170,18 +170,18 @@ export function DashboardView({ websites }: DashboardViewProps) {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <CheckCircle className="h-5 w-5 text-green-600" />
               Availability (24h)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={performanceData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="time" stroke="#888" fontSize={12} />
-                <YAxis stroke="#888" fontSize={12} domain={[0, 100]} />
+                <XAxis dataKey="time" stroke="#888" fontSize={12} minTickGap={20} />
+                <YAxis stroke="#888" fontSize={12} width={36} domain={[0, 100]} />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'white', 
@@ -203,23 +203,23 @@ export function DashboardView({ websites }: DashboardViewProps) {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base sm:text-lg">Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {recentActivity.length === 0 ? (
               <p className="text-sm text-gray-600">No monitored website activity yet. Add a website and run checks.</p>
             ) : recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-start gap-4 border-b pb-4 last:border-0 last:pb-0">
+              <div key={index} className="flex flex-col gap-2 border-b pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-start sm:gap-4 sm:pb-4">
                 <div className={`mt-1 h-2 w-2 rounded-full ${
                   activity.severity === 'success' ? 'bg-green-500' :
                   activity.severity === 'warning' ? 'bg-yellow-500' :
                   'bg-red-500'
                 }`} />
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-gray-900">{activity.site}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium text-gray-900 break-all">{activity.site}</p>
                     <Badge variant={
                       activity.severity === 'success' ? 'default' :
                       activity.severity === 'warning' ? 'secondary' :
@@ -230,7 +230,7 @@ export function DashboardView({ websites }: DashboardViewProps) {
                   </div>
                   <p className="text-sm text-gray-600">{activity.message}</p>
                 </div>
-                <span className="text-xs text-gray-500">{activity.time}</span>
+                <span className="text-xs text-gray-500 sm:whitespace-nowrap">{activity.time}</span>
               </div>
             ))}
           </div>

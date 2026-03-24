@@ -287,7 +287,7 @@ function AuthPage({ mode = "login", onSwitchMode, onAuthSuccess }: AuthPageProps
 
   return (
     <div
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950"
+      className="relative min-h-screen flex flex-col items-center justify-start py-8 px-4 sm:py-12 md:py-1 overflow-y-auto bg-slate-950"
       style={{
         backgroundImage:
           "linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.65)), url('https://res.cloudinary.com/dujfud9ha/image/upload/v1772124639/WF0s65CI53CU2PM_3YNbe_qgdunr.png')",
@@ -296,7 +296,7 @@ function AuthPage({ mode = "login", onSwitchMode, onAuthSuccess }: AuthPageProps
       }}
     >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/10 to-cyan-500/20 animate-pulse" />
-      <Card className="relative z-10 w-full max-w-md bg-white/85 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-700">
+      <Card className="relative z-10 w-full max-w-md bg-white/85 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-700 my-auto sm:my-8 md:my-12">
           <CardHeader className="space-y-2">
           <div className="flex justify-center pb-2">
             <img
