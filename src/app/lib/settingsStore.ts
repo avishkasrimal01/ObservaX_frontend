@@ -45,7 +45,7 @@ function randomApiKey() {
 export function defaultObserverSettings(primaryEmail = "admin@example.com"): ObserverSettings {
   return {
     general: {
-      companyName: "Acme Corporation",
+      companyName: "ObservaX Corporation",
       primaryEmail,
       autoResolveAlerts: true,
       maintenanceMode: false,
