@@ -87,7 +87,7 @@ export type SiteQaApiResponse = {
 };
 
 const API_BASE_URL = (import.meta.env.VITE_OBSERVERX_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
-  "http://127.0.0.1:9000";
+  "https://observa-x-backend.vercel.app";
 
 function buildJsonHeaders() {
   const headers: Record<string, string> = {
