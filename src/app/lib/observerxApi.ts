@@ -87,12 +87,23 @@ export type SiteQaApiResponse = {
 };
 
 const API_BASE_URL = (import.meta.env.VITE_OBSERVERX_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
-  "https://observa-x-backend.vercel.app";
+  "http://127.0.0.1:9000";
+
+function buildJsonHeaders() {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  const authToken = localStorage.getItem("authToken");
+  if (authToken) {
+    headers.Authorization = `Bearer ${authToken}`;
+  }
+  return headers;
+}
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: buildJsonHeaders(),
     body: JSON.stringify(body),
   });
 
@@ -106,7 +117,7 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: buildJsonHeaders(),
   });
   const data = (await res.json()) as T & { ok?: boolean; error?: string };
   if (!res.ok || (typeof data === "object" && data && "ok" in data && data.ok === false)) {
@@ -118,7 +129,7 @@ async function getJson<T>(path: string): Promise<T> {
 async function deleteJson<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: buildJsonHeaders(),
   });
   const data = (await res.json()) as T & { ok?: boolean; error?: string };
   if (!res.ok || (typeof data === "object" && data && "ok" in data && data.ok === false)) {
@@ -157,6 +168,7 @@ export async function runWebsiteSiteQa(url: string, alertEmail?: string | null) 
 
 export type MonitoredWebsiteRecord = {
   id?: string;
+  uid?: string;
   name: string;
   url: string;
   monitoring?: boolean;
@@ -178,6 +190,10 @@ export async function saveMonitoredWebsiteRecord(record: MonitoredWebsiteRecord)
 
 export async function fetchMonitoredWebsiteRecords() {
   return getJson<{ ok: boolean; websites: MonitoredWebsiteRecord[] }>("/api/websites");
+}
+
+export async function fetchAdminMonitoredWebsiteRecords() {
+  return getJson<{ ok: boolean; websites: MonitoredWebsiteRecord[] }>("/api/admin/websites");
 }
 
 export async function deleteMonitoredWebsiteRecord(websiteId: string) {

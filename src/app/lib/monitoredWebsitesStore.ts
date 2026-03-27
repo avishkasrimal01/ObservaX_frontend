@@ -8,6 +8,7 @@ export type WebsiteStatus = "operational" | "degraded" | "down";
 
 export interface MonitoredWebsite {
   id: string;
+  uid?: string;
   name: string;
   url: string;
   status: WebsiteStatus;

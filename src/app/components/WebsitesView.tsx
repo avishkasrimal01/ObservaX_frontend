@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -49,6 +49,10 @@ export function WebsitesView({ websites, setWebsites, alertEmail = null }: Websi
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingWebsiteId, setEditingWebsiteId] = useState<string | null>(null);
   const [editWebsite, setEditWebsite] = useState({ name: "", url: "" });
+
+  useEffect(() => {
+    console.log("Websites route data:", websites);
+  }, [websites]);
 
   const normalizeWebsiteUrl = (value: string) => {
     const trimmed = value.trim();

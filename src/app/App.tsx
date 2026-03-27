@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
 import { DashboardView } from "./components/DashboardView";
@@ -54,6 +55,31 @@ const SESSION_CHECK_INTERVAL_MS = 30 * 1000;
 const AUTH_TABS = new Set(["landing", "login", "signup"]);
 const ADMIN_ONLY_TABS = new Set(["admin-panel", "admin-users", "admin-payments", "admin-support"]);
 const ADMIN_ALLOWED_TABS = new Set(["admin-panel", "admin-users", "admin-payments", "admin-support", "profile"]);
+const TAB_ROUTES: Record<string, string> = {
+  landing: "/",
+  login: "/login",
+  signup: "/signup",
+  dashboard: "/dashboard",
+  websites: "/websites",
+  monitoring: "/monitoring",
+  alerts: "/alerts",
+  "ai-insights": "/ai-insights",
+  analytics: "/analytics",
+  settings: "/settings",
+  profile: "/profile",
+  billing: "/billing",
+  help: "/help",
+  support: "/support",
+  about: "/about",
+  "admin-panel": "/admin",
+  "admin-users": "/admin/users",
+  "admin-payments": "/admin/payments",
+  "admin-support": "/admin/support",
+  "subscription-onboarding": "/subscription",
+};
+const ROUTE_TABS = Object.fromEntries(
+  Object.entries(TAB_ROUTES).map(([tab, path]) => [path, tab]),
+) as Record<string, string>;
 
 function getDefaultTabForRole(isAdmin: boolean) {
   return isAdmin ? "admin-panel" : "dashboard";
@@ -78,16 +104,9 @@ const systemSearchItems: SystemSearchItem[] = [
   { id: "admin-support", label: "Admin Support", description: "Respond to support chat messages", tab: "admin-support", keywords: ["admin", "support", "chat", "inbox"] },
 ];
 
-
 export default function App() {
-  const [activeTab, setActiveTab] = useState(() => {
-    if (!localStorage.getItem("authToken")) {
-      return "landing";
-    }
-
-    const role = localStorage.getItem("userRole");
-    return role === "admin" ? "admin-panel" : "dashboard";
-  });
+  const location = useLocation();
+  const navigate = useNavigate();
   const [websites, setWebsites] = useState<MonitoredWebsite[]>(() => loadMonitoredWebsites());
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => Boolean(localStorage.getItem("authToken")));
   const [userEmail, setUserEmail] = useState<string | null>(() => localStorage.getItem("userEmail"));
@@ -101,7 +120,25 @@ export default function App() {
   const [subscriptionHistory, setSubscriptionHistory] = useState<SubscriptionRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [settings, setSettings] = useState<ObserverSettings>(() =>
-    loadObserverSettings(localStorage.getItem("userEmail") || "admin@example.com")
+    loadObserverSettings(localStorage.getItem("userEmail") || "admin@example.com"),
+  );
+
+  const currentPath = useMemo(() => {
+    if (location.pathname.length > 1 && location.pathname.endsWith("/")) {
+      return location.pathname.slice(0, -1);
+    }
+    return location.pathname;
+  }, [location.pathname]);
+  const activeTab = ROUTE_TABS[currentPath] || null;
+
+  const navigateToTab = useCallback(
+    (tab: string, options?: { replace?: boolean }) => {
+      const path = TAB_ROUTES[tab] || TAB_ROUTES.dashboard;
+      if (path !== currentPath) {
+        navigate(path, { replace: options?.replace ?? false });
+      }
+    },
+    [currentPath, navigate],
   );
 
   const handleLogout = useCallback(
@@ -125,11 +162,12 @@ export default function App() {
       setUserUid(null);
       setIsAdmin(false);
       setUserAvatarUrl(null);
+      setWebsites([]);
       setCurrentSubscription(null);
       setSubscriptionHistory([]);
-      setActiveTab(nextTab);
+      navigateToTab(nextTab, { replace: true });
     },
-    [],
+    [navigateToTab],
   );
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -149,7 +187,7 @@ export default function App() {
     : [];
 
   const handleSelectSearchResult = (tab: string) => {
-    setActiveTab(tab);
+    navigateToTab(tab);
     setSearchQuery("");
   };
 
@@ -219,24 +257,37 @@ export default function App() {
   }, [isAuthenticated, userUid]);
 
   useEffect(() => {
+    if (activeTab) {
+      return;
+    }
+
     if (!isAuthenticated) {
-      if (!AUTH_TABS.has(activeTab)) {
-        setActiveTab("landing");
+      navigateToTab("landing", { replace: true });
+      return;
+    }
+
+    navigateToTab(getDefaultTabForRole(isAdmin), { replace: true });
+  }, [activeTab, isAuthenticated, isAdmin, navigateToTab]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      if (!activeTab || !AUTH_TABS.has(activeTab)) {
+        navigateToTab("landing", { replace: true });
       }
       return;
     }
 
     if (isAdmin) {
-      if (!ADMIN_ALLOWED_TABS.has(activeTab)) {
-        setActiveTab(getDefaultTabForRole(true));
+      if (!activeTab || !ADMIN_ALLOWED_TABS.has(activeTab)) {
+        navigateToTab(getDefaultTabForRole(true), { replace: true });
       }
       return;
     }
 
-    if (ADMIN_ONLY_TABS.has(activeTab) || AUTH_TABS.has(activeTab)) {
-      setActiveTab(getDefaultTabForRole(false));
+    if (!activeTab || ADMIN_ONLY_TABS.has(activeTab) || AUTH_TABS.has(activeTab)) {
+      navigateToTab(getDefaultTabForRole(false), { replace: true });
     }
-  }, [activeTab, isAuthenticated, isAdmin]);
+  }, [activeTab, isAuthenticated, isAdmin, navigateToTab]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -312,6 +363,7 @@ export default function App() {
 
   useEffect(() => {
     if (!isAuthenticated || !userUid) {
+      setWebsites([]);
       return;
     }
 
@@ -336,43 +388,41 @@ export default function App() {
   }, [handleLogout, isAuthenticated, userUid]);
 
   useEffect(() => {
+    if (!isAuthenticated || !userUid) {
+      return;
+    }
+
     let cancelled = false;
 
     const hydrateFromBackend = async () => {
       try {
         const res = await fetchMonitoredWebsiteRecords();
-        if (cancelled || !res.websites?.length) return;
+        if (cancelled) return;
 
-        setWebsites((prev) => {
-          const byId = new Map(prev.map((w) => [w.id, w]));
-          for (const record of res.websites) {
-            const id = String(record.id ?? record.url);
-            const existing = byId.get(id);
-            byId.set(id, {
-              id,
-              name: record.name || existing?.name || record.url,
-              url: record.url,
-              monitoring: record.monitoring ?? existing?.monitoring ?? true,
-              status:
-                record.status === "down"
-                  ? "down"
-                  : record.status === "degraded"
-                    ? "degraded"
-                  : "operational",
-              uptime: typeof record.uptime === "number" ? record.uptime : existing?.uptime ?? 0,
-              responseTime:
-                typeof record.responseTime === "number" ? record.responseTime : existing?.responseTime ?? 0,
-              lastChecked: record.lastChecked || existing?.lastChecked || "Unknown",
-              scanError: record.scanError ?? existing?.scanError ?? null,
-              latest_runs: record.latest_runs ?? existing?.latest_runs ?? {},
-              httpResult: existing?.httpResult ?? null,
-              domResult: existing?.domResult ?? null,
-              qaResult: existing?.qaResult ?? null,
-              scanLoading: false,
-            });
-          }
-          return Array.from(byId.values());
-        });
+        const nextWebsites = (res.websites || []).map((record) => ({
+          id: String(record.id ?? record.url),
+          uid: record.uid ?? userUid,
+          name: record.name || record.url,
+          url: record.url,
+          monitoring: record.monitoring ?? true,
+          status:
+            record.status === "down"
+              ? "down"
+              : record.status === "degraded"
+                ? "degraded"
+                : "operational",
+          uptime: typeof record.uptime === "number" ? record.uptime : 0,
+          responseTime: typeof record.responseTime === "number" ? record.responseTime : 0,
+          lastChecked: record.lastChecked || "Unknown",
+          scanError: record.scanError ?? null,
+          latest_runs: record.latest_runs ?? {},
+          httpResult: null,
+          domResult: null,
+          qaResult: null,
+          scanLoading: false,
+        }));
+
+        setWebsites(nextWebsites);
       } catch {
         // Backend may be offline; keep local state.
       }
@@ -382,7 +432,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isAuthenticated, userUid]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -413,7 +463,7 @@ export default function App() {
           <BillingView
             currentSubscription={currentSubscription}
             subscriptionHistory={subscriptionHistory}
-            onChangePlanClick={() => setActiveTab("subscription-onboarding")}
+            onChangePlanClick={() => navigateToTab("subscription-onboarding")}
           />
         );
       case "help":
@@ -473,36 +523,36 @@ export default function App() {
       case "login":
         return (
           <LoginPage
-            onSwitchMode={() => setActiveTab("signup")}
+            onSwitchMode={() => navigateToTab("signup")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              setActiveTab(getDefaultTabForRole(authedIsAdmin));
+              navigateToTab(getDefaultTabForRole(authedIsAdmin));
             }}
           />
         );
       case "signup":
         return (
           <SignupPage
-            onSwitchMode={() => setActiveTab("login")}
+            onSwitchMode={() => navigateToTab("login")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              setActiveTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding");
+              navigateToTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding");
             }}
           />
         );
       case "landing":
-        return <LandingPage onGetStarted={() => setActiveTab("login")} />;
+        return <LandingPage onGetStarted={() => navigateToTab("login")} />;
       case "subscription-onboarding":
         if (!userUid || !userEmail) {
-          return <LandingPage onGetStarted={() => setActiveTab("login")} />;
+          return <LandingPage onGetStarted={() => navigateToTab("login")} />;
         }
         return (
           <SubscriptionOnboardingView
@@ -514,7 +564,7 @@ export default function App() {
               void loadSubscriptionSnapshot(userUid).then((snapshot) => {
                 setSubscriptionHistory(snapshot.history);
               });
-              setActiveTab("dashboard");
+              navigateToTab("dashboard");
             }}
           />
         );
@@ -534,29 +584,29 @@ export default function App() {
           </div>
         ) : null}
         {activeTab === "landing" ? (
-          <LandingPage onGetStarted={() => setActiveTab("login")} />
+          <LandingPage onGetStarted={() => navigateToTab("login")} />
         ) : activeTab === "signup" ? (
           <SignupPage
-            onSwitchMode={() => setActiveTab("login")}
+            onSwitchMode={() => navigateToTab("login")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              setActiveTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding");
+              navigateToTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding");
             }}
           />
         ) : (
           <LoginPage
-            onSwitchMode={() => setActiveTab("signup")}
+            onSwitchMode={() => navigateToTab("signup")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              setActiveTab(getDefaultTabForRole(authedIsAdmin));
+              navigateToTab(getDefaultTabForRole(authedIsAdmin));
             }}
           />
         )}
@@ -600,11 +650,11 @@ export default function App() {
               void loadSubscriptionSnapshot(userUid).then((snapshot) => {
                 setSubscriptionHistory(snapshot.history);
               });
-              setActiveTab("dashboard");
+              navigateToTab("dashboard");
             }}
           />
         ) : (
-          <LandingPage onGetStarted={() => setActiveTab("login")} />
+          <LandingPage onGetStarted={() => navigateToTab("login")} />
         )}
         <Toaster />
       </div>
@@ -623,17 +673,17 @@ export default function App() {
         onSearchChange={setSearchQuery}
         onSearchSubmit={handleSearchSubmit}
         onSelectSearchResult={handleSelectSearchResult}
-        onLoginClick={() => setActiveTab("login")}
-        onAlertsClick={() => setActiveTab("alerts")}
-        onProfileClick={() => setActiveTab("profile")}
-        onBillingClick={() => setActiveTab("billing")}
-        onSettingsClick={() => setActiveTab("settings")}
+        onLoginClick={() => navigateToTab("login")}
+        onAlertsClick={() => navigateToTab("alerts")}
+        onProfileClick={() => navigateToTab("profile")}
+        onBillingClick={() => navigateToTab("billing")}
+        onSettingsClick={() => navigateToTab("settings")}
         onLogoutClick={() => {
           void handleLogout("landing");
         }}
       />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} isAdmin={isAdmin} />
+        <Sidebar activeTab={activeTab || ""} onTabChange={navigateToTab} isAdmin={isAdmin} />
         <main
           className="flex-1 overflow-y-auto p-8"
           style={{
@@ -646,7 +696,7 @@ export default function App() {
           <div className="rounded-2xl bg-gradient-to-br from-cyan-100/30 via-white/35 to-violet-100/30 p-4 sm:p-6">
             {renderContent()}
           </div>
-          <SystemFooter onNavigate={setActiveTab} />
+          <SystemFooter onNavigate={navigateToTab} />
         </main>
       </div>
       <Toaster />

@@ -349,7 +349,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               {planOptions.map((plan) => (
                 <Card
                   key={plan.name}
-                  className={`border-white/20 bg-white/90 ${plan.featured ? "ring-2 ring-cyan-400/70" : ""}`}
+                  className={`flex h-full flex-col border-white/20 bg-white/90 ${plan.featured ? "ring-2 ring-cyan-400/70" : ""}`}
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
@@ -361,13 +361,13 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                       <span className="text-sm font-medium text-gray-500">{plan.cycle}</span>
                     </p>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <ul className="space-y-1 text-sm text-gray-700">
+                  <CardContent className="flex flex-1 flex-col space-y-3">
+                    <ul className="flex-1 space-y-1 text-sm text-gray-700">
                       {plan.benefits.map((benefit) => (
                         <li key={benefit}>• {benefit}</li>
                       ))}
                     </ul>
-                    <Button className="w-full" onClick={onGetStarted}>
+                    <Button className="mt-auto w-full" onClick={onGetStarted}>
                       Get Started
                     </Button>
                   </CardContent>

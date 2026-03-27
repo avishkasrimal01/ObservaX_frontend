@@ -21,14 +21,14 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <Card>
-      <CardContent className="p-4 sm:p-6">
+      <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-xs text-gray-600 sm:text-sm">{title}</p>
-            <p className="mt-2 text-2xl font-semibold text-gray-900 sm:text-3xl">{value}</p>
+            <p className="text-sm text-gray-600">{title}</p>
+            <p className="mt-2 text-3xl font-semibold text-gray-900">{value}</p>
             {change && (
               <p className={cn(
-                "mt-2 text-xs sm:text-sm",
+                "mt-2 text-sm",
                 changeType === "positive" && "text-green-600",
                 changeType === "negative" && "text-red-600",
                 changeType === "neutral" && "text-gray-600"
@@ -38,10 +38,10 @@ export function StatCard({
             )}
           </div>
           <div className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-lg sm:h-12 sm:w-12",
+            "flex h-12 w-12 items-center justify-center rounded-lg",
             iconColor
           )}>
-            <Icon className="h-5 w-5 text-white sm:h-6 sm:w-6" />
+            <Icon className="h-6 w-6 text-white" />
           </div>
         </div>
       </CardContent>
