@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { addDoc, collection, onSnapshot, query, serverTimestamp, Timestamp, where } from "firebase/firestore";
-import { LifeBuoy, Mail, MessageSquare, Clock } from "lucide-react";
+import { LifeBuoy, Mail, MessageSquare, Clock, MapPin, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { firebaseDb } from "../lib/firebaseClient";
 
@@ -44,6 +44,11 @@ function createSupportReply(message: string): string {
 }
 
 export function SupportView({ userUid, userEmail }: SupportViewProps) {
+  const supportPhone = "0382288416";
+  const supportAddress = "#317/2, Kumbuka Rd, Raigama North, Bandaragama.";
+  const primarySupportEmail = "observax.info@gmail.com";
+  const secondarySupportEmail = "sa23081666@.my.sliit.lk";
+
   const [chatRequested, setChatRequested] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -163,11 +168,11 @@ export function SupportView({ userUid, userEmail }: SupportViewProps) {
   };
 
   const handleOpenEmail = () => {
-    const subject = encodeURIComponent("ObserverX Support Request");
+    const subject = encodeURIComponent("ObservaX Support Request");
     const body = encodeURIComponent(
       "Hi Support Team,"
     );
-    window.location.href = `mailto:support@observax.lk?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:${primarySupportEmail}?subject=${subject}&body=${body}`;
     toast.message("Email client opened", {
       description: "Drafted a support email with issue details template.",
     });
@@ -215,6 +220,84 @@ export function SupportView({ userUid, userEmail }: SupportViewProps) {
             <Button size="sm" variant="outline" onClick={handleOpenEmail}>
               Open Email
             </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <MapPin className="h-5 w-5 text-green-600" />
+              Office Location
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="overflow-hidden rounded-xl border">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1806.896818956293!2d80.01690741810727!3d6.725298168263324!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2slk!4v1774631238264!5m2!1sen!2slk"
+                width="600"
+                height="450"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-64 w-full sm:h-72"
+                title="ObservaX office location"
+              />
+            </div>
+            <p className="text-sm text-gray-700">
+              Visit us at <span className="font-medium text-gray-900">{supportAddress}</span>
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <LifeBuoy className="h-5 w-5 text-green-600" />
+              Contact Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm text-gray-700">
+            <div className="rounded-lg border bg-white p-3">
+              <p className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <Phone className="h-4 w-4 text-green-600" />
+                Telephone
+              </p>
+              <a href={`tel:${supportPhone}`} className="text-base font-semibold text-gray-900 hover:text-green-700">
+                {supportPhone}
+              </a>
+            </div>
+
+            <div className="rounded-lg border bg-white p-3">
+              <p className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <Mail className="h-4 w-4 text-green-600" />
+                Email
+              </p>
+              <div className="space-y-1">
+                <a
+                  href={`mailto:${primarySupportEmail}`}
+                  className="block break-all font-medium text-gray-900 hover:text-green-700"
+                >
+                  {primarySupportEmail}
+                </a>
+                <a
+                  href={`mailto:${secondarySupportEmail}`}
+                  className="block break-all text-gray-700 hover:text-green-700"
+                >
+                  {secondarySupportEmail}
+                </a>
+              </div>
+            </div>
+
+            <div className="rounded-lg border bg-white p-3">
+              <p className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <MapPin className="h-4 w-4 text-green-600" />
+                Address
+              </p>
+              <p className="text-gray-900">{supportAddress}</p>
+            </div>
           </CardContent>
         </Card>
       </div>
