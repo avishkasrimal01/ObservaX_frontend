@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
-import { addDoc, collection, onSnapshot, query, serverTimestamp, Timestamp, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, onSnapshot, query, serverTimestamp, Timestamp, where, writeBatch } from "firebase/firestore";
 import { LifeBuoy, Mail, MessageSquare, Clock, MapPin, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { firebaseDb } from "../lib/firebaseClient";
@@ -52,6 +52,7 @@ export function SupportView({ userUid, userEmail }: SupportViewProps) {
   const [chatRequested, setChatRequested] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isClearingChat, setIsClearingChat] = useState(false);
 
   const normalizedUserEmail = useMemo(() => (userEmail || "").trim() || "unknown@observax.app", [userEmail]);
 
@@ -167,6 +168,34 @@ export function SupportView({ userUid, userEmail }: SupportViewProps) {
     }
   };
 
+  const handleClearChat = async () => {
+    if (!userUid) {
+      toast.error("Please sign in to clear support chat.");
+      return;
+    }
+
+    setIsClearingChat(true);
+    try {
+      const supportQuery = query(
+        collection(firebaseDb, "support_messages"),
+        where("uid", "==", userUid),
+      );
+      const supportSnapshot = await getDocs(supportQuery);
+      const batch = writeBatch(firebaseDb);
+
+      supportSnapshot.forEach((entry) => {
+        batch.delete(entry.ref);
+      });
+
+      await batch.commit();
+      toast.success("Support chat cleared.");
+    } catch {
+      toast.error("Failed to clear support chat. Please try again.");
+    } finally {
+      setIsClearingChat(false);
+    }
+  };
+
   const handleOpenEmail = () => {
     const subject = encodeURIComponent("ObservaX Support Request");
     const body = encodeURIComponent(
@@ -227,10 +256,21 @@ export function SupportView({ userUid, userEmail }: SupportViewProps) {
       {chatRequested && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <MessageSquare className="h-5 w-5 text-green-600" />
-              Support Chatbot
-            </CardTitle>
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MessageSquare className="h-5 w-5 text-green-600" />
+                Support Chatbot
+              </CardTitle>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => void handleClearChat()}
+                disabled={isClearingChat || messages.length === 0}
+              >
+                {isClearingChat ? "Clearing..." : "Clear Chat"}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="max-h-72 space-y-2 overflow-y-auto rounded-md border bg-white p-3">

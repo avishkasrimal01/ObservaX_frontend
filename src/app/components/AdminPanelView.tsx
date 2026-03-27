@@ -3,6 +3,7 @@ import {
   addDoc,
   collection,
   collectionGroup,
+  deleteDoc,
   doc,
   getDocs,
   onSnapshot,
@@ -141,6 +142,8 @@ export function AdminPanelView({
   const [selectedSupportUid, setSelectedSupportUid] = useState<string>("");
   const [adminReplyInput, setAdminReplyInput] = useState<string>("");
   const [isSendingSupportReply, setIsSendingSupportReply] = useState<boolean>(false);
+  const [isClearingSupportChat, setIsClearingSupportChat] = useState<boolean>(false);
+  const [deletingSupportMessageId, setDeletingSupportMessageId] = useState<string>("");
 
   useEffect(() => {
     setActiveSection(defaultSection);
@@ -540,6 +543,57 @@ export function AdminPanelView({
     }
   };
 
+  const handleDeleteSupportMessage = async (messageId: string) => {
+    if (!isAdmin || !messageId) {
+      return;
+    }
+
+    const approved = window.confirm("Delete this message from the support conversation?");
+    if (!approved) {
+      return;
+    }
+
+    setDeletingSupportMessageId(messageId);
+    setDataError("");
+
+    try {
+      await deleteDoc(doc(firebaseDb, "support_messages", messageId));
+    } catch {
+      setDataError("Failed to delete support message.");
+    } finally {
+      setDeletingSupportMessageId("");
+    }
+  };
+
+  const handleClearSupportConversation = async () => {
+    if (!isAdmin || !selectedSupportUid) {
+      return;
+    }
+
+    setIsClearingSupportChat(true);
+    setDataError("");
+
+    try {
+      const conversationQuery = query(
+        collection(firebaseDb, "support_messages"),
+        where("uid", "==", selectedSupportUid),
+      );
+      const conversationSnapshot = await getDocs(conversationQuery);
+      const batch = writeBatch(firebaseDb);
+
+      conversationSnapshot.forEach((entry) => {
+        batch.delete(entry.ref);
+      });
+
+      await batch.commit();
+      setAdminReplyInput("");
+    } catch {
+      setDataError("Failed to clear support conversation.");
+    } finally {
+      setIsClearingSupportChat(false);
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -879,24 +933,46 @@ export function AdminPanelView({
                 </div>
               </div>
 
+              <div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => void handleClearSupportConversation()}
+                  disabled={!selectedSupportUid || isClearingSupportChat}
+                >
+                  {isClearingSupportChat ? "Deleting..." : "Delete Full User Chat"}
+                </Button>
+              </div>
+
               <div className="rounded-lg border bg-white p-3 space-y-3">
                 <div className="max-h-72 overflow-y-auto space-y-2 rounded-md border bg-slate-50 p-3">
                   {selectedConversationMessages.length === 0 ? (
                     <p className="text-sm text-gray-500">No messages for the selected conversation.</p>
                   ) : (
                     selectedConversationMessages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`rounded-md px-3 py-2 text-sm ${
-                          message.role === "user"
-                            ? "ml-8 bg-emerald-100 text-emerald-900"
-                            : message.role === "admin"
-                              ? "mr-8 bg-blue-100 text-blue-900"
-                              : "mr-8 bg-gray-200 text-gray-700"
-                        }`}
-                      >
-                        <p>{message.text}</p>
-                        <p className="mt-1 text-[11px] text-gray-500">{formatDate(message.createdAtISO)}</p>
+                      <div key={message.id} className="flex items-start gap-2">
+                        <div
+                          className={`flex-1 rounded-md px-3 py-2 text-sm ${
+                            message.role === "user"
+                              ? "ml-8 bg-emerald-100 text-emerald-900"
+                              : message.role === "admin"
+                                ? "mr-8 bg-blue-100 text-blue-900"
+                                : "mr-8 bg-gray-200 text-gray-700"
+                          }`}
+                        >
+                          <p>{message.text}</p>
+                          <p className="mt-1 text-[11px] text-gray-500">{formatDate(message.createdAtISO)}</p>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-2 text-xs"
+                          onClick={() => void handleDeleteSupportMessage(message.id)}
+                          disabled={deletingSupportMessageId === message.id}
+                        >
+                          {deletingSupportMessageId === message.id ? "Deleting..." : "Delete"}
+                        </Button>
                       </div>
                     ))
                   )}
