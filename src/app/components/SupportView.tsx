@@ -224,6 +224,51 @@ export function SupportView({ userUid, userEmail }: SupportViewProps) {
         </Card>
       </div>
 
+      {chatRequested && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <MessageSquare className="h-5 w-5 text-green-600" />
+              Support Chatbot
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="max-h-72 space-y-2 overflow-y-auto rounded-md border bg-white p-3">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`rounded-md px-3 py-2 text-sm ${
+                    message.role === "user"
+                      ? "ml-8 bg-green-50 text-gray-800"
+                      : message.role === "admin"
+                        ? "mr-8 bg-blue-100 text-blue-900"
+                        : "mr-8 bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  <p>{message.text}</p>
+                  <p className="mt-1 text-[11px] text-gray-500">{message.time}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-2">
+              <Input
+                value={chatInput}
+                onChange={(event) => setChatInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleSendChatMessage();
+                  }
+                }}
+                placeholder="Describe your issue (errors, website URL, alert behavior)..."
+              />
+              <Button onClick={handleSendChatMessage}>Send</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
         <Card>
           <CardHeader>
@@ -301,51 +346,6 @@ export function SupportView({ userUid, userEmail }: SupportViewProps) {
           </CardContent>
         </Card>
       </div>
-
-      {chatRequested && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <MessageSquare className="h-5 w-5 text-green-600" />
-              Support Chatbot
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="max-h-72 space-y-2 overflow-y-auto rounded-md border bg-white p-3">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`rounded-md px-3 py-2 text-sm ${
-                    message.role === "user"
-                      ? "ml-8 bg-green-50 text-gray-800"
-                      : message.role === "admin"
-                        ? "mr-8 bg-blue-100 text-blue-900"
-                        : "mr-8 bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  <p>{message.text}</p>
-                  <p className="mt-1 text-[11px] text-gray-500">{message.time}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-2">
-              <Input
-                value={chatInput}
-                onChange={(event) => setChatInput(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    handleSendChatMessage();
-                  }
-                }}
-                placeholder="Describe your issue (errors, website URL, alert behavior)..."
-              />
-              <Button onClick={handleSendChatMessage}>Send</Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <Card>
         <CardHeader>
