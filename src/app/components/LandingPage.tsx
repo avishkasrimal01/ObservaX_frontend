@@ -2,6 +2,12 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./ui/accordion";
+import {
   Activity,
   BellRing,
   Brain,
@@ -98,6 +104,29 @@ const planOptions = [
       "Integration-ready alert channels",
       "Dedicated customer success",
     ],
+  },
+];
+
+const faqItems = [
+  {
+    question: "How often can ObservaX run synthetic checks?",
+    answer:
+      "You can tune check frequency based on the workflow you want to protect, from high-frequency journey checks to lower-noise intervals for broader coverage.",
+  },
+  {
+    question: "What types of monitoring does the platform support?",
+    answer:
+      "ObservaX supports browser journeys, HTTP checks, DOM regression monitoring, and API verification so you can cover both user-facing and backend reliability.",
+  },
+  {
+    question: "Can alerts be routed to different teams?",
+    answer:
+      "Yes. Alerts can be configured to match escalation needs, helping route incidents to the right team with the right level of urgency.",
+  },
+  {
+    question: "Is ObservaX suitable for small teams and enterprises?",
+    answer:
+      "Yes. The platform scales from lightweight starter workflows to enterprise monitoring setups with broader alerting, analytics, and support needs.",
   },
 ];
 
@@ -374,6 +403,37 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                 </Card>
               ))}
             </div>
+          </div>
+        </section>
+
+        
+
+        <section className="mt-10">
+          <div className="rounded-2xl border border-white/25 bg-white/5 p-4 backdrop-blur-md sm:p-5">
+            <div className="mb-4 max-w-2xl">
+              <Badge className="w-fit bg-cyan-500/20 text-cyan-100 hover:bg-cyan-500/25">FAQ</Badge>
+              <h3 className="mt-2 text-2xl font-semibold text-white">Frequently asked questions</h3>
+              <p className="text-sm text-slate-300">
+                Quick answers about monitoring, alerts, and how ObservaX fits into your reliability workflow.
+              </p>
+            </div>
+
+            <Card className="border-white/20 bg-white/90">
+              <CardContent className="p-0">
+                <Accordion type="single" collapsible className="px-4 sm:px-5">
+                  {faqItems.map((item, index) => (
+                    <AccordionItem key={item.question} value={`faq-${index}`}>
+                      <AccordionTrigger className="text-left text-sm font-medium text-gray-900 no-underline hover:no-underline">
+                        {item.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="pr-8 text-sm leading-6 text-gray-700">
+                        {item.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
           </div>
         </section>
 
