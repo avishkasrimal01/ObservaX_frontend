@@ -501,6 +501,8 @@ export default function App() {
       case "login":
         return (
           <LoginPage
+            themeMode={themeMode}
+            onThemeToggle={toggleThemeMode}
             onSwitchMode={() => setActiveTab("signup")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
@@ -515,6 +517,8 @@ export default function App() {
       case "signup":
         return (
           <SignupPage
+            themeMode={themeMode}
+            onThemeToggle={toggleThemeMode}
             onSwitchMode={() => setActiveTab("login")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
@@ -527,10 +531,10 @@ export default function App() {
           />
         );
       case "landing":
-        return <LandingPage onGetStarted={() => setActiveTab("login")} />;
+        return <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => setActiveTab("login")} />;
       case "subscription-onboarding":
         if (!userUid || !userEmail) {
-          return <LandingPage onGetStarted={() => setActiveTab("login")} />;
+          return <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => setActiveTab("login")} />;
         }
         return (
           <SubscriptionOnboardingView
@@ -566,9 +570,11 @@ export default function App() {
           </div>
         ) : null}
         {activeTab === "landing" ? (
-          <LandingPage onGetStarted={() => setActiveTab("login")} />
+          <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => setActiveTab("login")} />
         ) : activeTab === "signup" ? (
           <SignupPage
+            themeMode={themeMode}
+            onThemeToggle={toggleThemeMode}
             onSwitchMode={() => setActiveTab("login")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
@@ -581,6 +587,8 @@ export default function App() {
           />
         ) : (
           <LoginPage
+            themeMode={themeMode}
+            onThemeToggle={toggleThemeMode}
             onSwitchMode={() => setActiveTab("signup")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
@@ -636,7 +644,7 @@ export default function App() {
             }}
           />
         ) : (
-          <LandingPage onGetStarted={() => setActiveTab("login")} />
+          <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => setActiveTab("login")} />
         )}
         <Toaster />
       </div>

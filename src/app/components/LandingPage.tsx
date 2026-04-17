@@ -21,10 +21,14 @@ import {
   Mail,
   Phone,
   MapPin,
+  Moon,
+  Sun,
 } from "lucide-react";
 
 type LandingPageProps = {
   onGetStarted: () => void;
+  themeMode: "light" | "dark";
+  onThemeToggle: () => void;
 };
 
 const featureItems = [
@@ -133,7 +137,9 @@ const faqItems = [
   },
 ];
 
-export function LandingPage({ onGetStarted }: LandingPageProps) {
+export function LandingPage({ onGetStarted, themeMode, onThemeToggle }: LandingPageProps) {
+  const isDarkMode = themeMode === "dark";
+
   return (
     <div
       className="relative min-h-screen overflow-hidden bg-slate-950"
@@ -157,7 +163,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 pb-12 pt-8">
-        <header className="flex items-center justify-between rounded-xl ">
+        <header className="flex items-center justify-between rounded-xl">
           <div className="flex items-center">
             <img
               src="https://res.cloudinary.com/dujfud9ha/image/upload/v1772124500/ObservaX_logo_2_sjv7ur.png"
@@ -165,9 +171,21 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               className="h-22 w-auto [filter:drop-shadow(0_0_10px_rgba(255,255,255,0.7))_drop-shadow(0_0_30px_rgba(255,255,255,0.45))]"
             />
           </div>
-          <Button variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10" onClick={onGetStarted}>
-            Sign In
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="border-white/30 bg-transparent text-white hover:bg-white/10"
+              onClick={onThemeToggle}
+              title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+            <Button variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10" onClick={onGetStarted}>
+              Sign In
+            </Button>
+          </div>
         </header>
 
         <section className="mt-10 grid items-center gap-8 lg:grid-cols-2">

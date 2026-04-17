@@ -16,6 +16,8 @@ interface AuthPageProps {
   onSwitchMode?: (mode: "login" | "signup") => void;
   onBackToLanding?: () => void;
   onAuthSuccess?: (payload: { email: string; uid: string; isAdmin: boolean }) => void;
+  themeMode: "light" | "dark";
+  onThemeToggle: () => void;
 }
 
 function AuthPage({ mode = "login", onSwitchMode, onAuthSuccess }: AuthPageProps) {
