@@ -18,6 +18,9 @@ import {
   Globe,
   Route,
   ScanLine,
+  Mail,
+  Phone,
+  MapPin,
 } from "lucide-react";
 
 type LandingPageProps = {
@@ -438,6 +441,69 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
         </section>
 
         <section className="mt-10">
+          <div className="overflow-hidden rounded-2xl border border-white/25 bg-white/5 p-4 backdrop-blur-md sm:p-5">
+            <div className="mb-4">
+              <Badge className="w-fit bg-cyan-500/20 text-cyan-100 hover:bg-cyan-500/25">Contact Us</Badge>
+              <h3 className="mt-2 text-2xl font-semibold text-white">Get in Touch</h3>
+              <p className="text-sm text-slate-300">Have questions? We'd love to hear from you. Reach out to our team anytime.</p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card className="border-white/20 bg-white/90">
+                <CardContent className="flex flex-col items-start gap-3 p-4">
+                  <div className="rounded-md bg-cyan-50 p-2">
+                    <Mail className="h-5 w-5 text-cyan-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Email</p>
+                    <a href="mailto:observax.info@gmail.com" className="text-sm text-cyan-600 hover:text-cyan-700 break-all">observax.info@gmail.com</a>
+                    <a href="mailto:sa23081666@my.sliit.lk" className="text-sm text-cyan-600 hover:text-cyan-700 break-all block">sa23081666@my.sliit.lk</a>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-white/20 bg-white/90">
+                <CardContent className="flex flex-col items-start gap-3 p-4">
+                  <div className="rounded-md bg-cyan-50 p-2">
+                    <Phone className="h-5 w-5 text-cyan-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Telephone</p>
+                    <a href="tel:0382288416" className="text-sm text-cyan-600 hover:text-cyan-700">0382288416</a><br>
+                    </br>
+                    <a href="tel:0765570996" className="text-sm text-cyan-600 hover:text-cyan-700">0765570996</a>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-white/20 bg-white/90">
+                <CardContent className="flex flex-col items-start gap-3 p-4">
+                  <div className="rounded-md bg-cyan-50 p-2">
+                    <MapPin className="h-5 w-5 text-cyan-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Address</p>
+                    <p className="text-sm text-gray-700">#317/2, Kumbuka Rd, Raigama North, Bandaragama</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="mt-6 overflow-hidden rounded-xl border border-white/20">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.264389844065!2d80.34789742346909!3d6.679449219265849!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae1f64ac2e24c5b%3A0x1234567890abcdef!2s%23317%2F2%2C%20Kumbuka%20Rd%2C%20Bandaragama!5e0!3m2!1sen!2slk!4v1234567890"
+                width="100%"
+                height="400"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          </div>
+        </section>
+
+         <section className="mt-10">
           <div className="overflow-hidden rounded-2xl border border-white/25 bg-white/5 p-3 backdrop-blur-md sm:p-4">
             <img
               src="https://res.cloudinary.com/dujfud9ha/image/upload/v1768732317/form_1_mv7g35.jpg"

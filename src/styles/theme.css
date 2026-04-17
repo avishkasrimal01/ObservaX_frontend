@@ -2,6 +2,7 @@
 
 :root {
   --font-size: 16px;
+  color-scheme: light;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
   --card: #ffffff;
@@ -42,6 +43,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.145 0 0);
@@ -76,6 +78,83 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+}
+
+@layer utilities {
+  .dark .bg-white {
+    background-color: rgb(15 23 42);
+  }
+
+  .dark .bg-white\/95 {
+    background-color: rgb(15 23 42 / 0.95);
+  }
+
+  .dark .bg-white\/35 {
+    background-color: rgb(15 23 42 / 0.35);
+  }
+
+  .dark .bg-white\/45 {
+    background-color: rgb(15 23 42 / 0.45);
+  }
+
+  .dark .bg-gray-50 {
+    background-color: rgb(15 23 42);
+  }
+
+  .dark .bg-gray-100,
+  .dark .hover\:bg-gray-100:hover {
+    background-color: rgb(30 41 59);
+  }
+
+  .dark .bg-slate-50 {
+    background-color: rgb(30 41 59);
+  }
+
+  .dark .bg-gray-200 {
+    background-color: rgb(51 65 85);
+  }
+
+  .dark .text-gray-900 {
+    color: rgb(241 245 249);
+  }
+
+  .dark .text-gray-700 {
+    color: rgb(203 213 225);
+  }
+
+  .dark .text-gray-600 {
+    color: rgb(148 163 184);
+  }
+
+  .dark .text-gray-500,
+  .dark .text-gray-400 {
+    color: rgb(148 163 184);
+  }
+
+  .dark .border-gray-200,
+  .dark .border-gray-300 {
+    border-color: rgb(71 85 105);
+  }
+
+  .dark .ring-offset-white {
+    --tw-ring-offset-color: rgb(15 23 42);
+  }
+
+  .dark .from-cyan-100\/30 {
+    --tw-gradient-from: rgb(34 211 238 / 0.14) var(--tw-gradient-from-position);
+    --tw-gradient-to: rgb(34 211 238 / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+
+  .dark .via-white\/35,
+  .dark .via-white\/45 {
+    --tw-gradient-to: rgb(15 23 42 / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), rgb(30 41 59 / 0.5) var(--tw-gradient-via-position), var(--tw-gradient-to);
+  }
+
+  .dark .to-violet-100\/30 {
+    --tw-gradient-to: rgb(59 130 246 / 0.16) var(--tw-gradient-to-position);
+  }
 }
 
 @theme inline {

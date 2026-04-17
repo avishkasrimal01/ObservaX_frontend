@@ -1,4 +1,4 @@
-import { Bell, Search, Settings, User } from "lucide-react";
+import { Bell, Moon, Search, Settings, Sun, User } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
@@ -27,6 +27,8 @@ interface HeaderProps {
   onProfileClick?: () => void;
   onBillingClick?: () => void;
   onSettingsClick?: () => void;
+  themeMode?: "light" | "dark";
+  onThemeToggle?: () => void;
   onLogoutClick?: () => void;
 }
 
@@ -45,10 +47,14 @@ export function Header({
   onProfileClick,
   onBillingClick,
   onSettingsClick,
+  themeMode = "light",
+  onThemeToggle,
   onLogoutClick,
 }: HeaderProps) {
+  const isDarkMode = themeMode === "dark";
+
   return (
-    <header className="border-b bg-white px-6 py-4">
+    <header className="border-b bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-900/90">
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
         <div className="flex items-center gap-3">
           {/* <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
@@ -83,13 +89,13 @@ export function Header({
                   }
                 }}
                 placeholder="Search features"
-                className="bg-gray-100/70 border-0 shadow-none pl-9 focus-visible:ring-0 focus-visible:border-transparent"
+                className="bg-gray-100/70 border-0 shadow-none pl-9 focus-visible:ring-0 focus-visible:border-transparent dark:bg-gray-800/80"
               />
 
               {searchQuery.trim() && (
-                <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 max-h-72 overflow-auto rounded-xl border bg-white p-1 shadow-lg">
+                <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 max-h-72 overflow-auto rounded-xl border bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-gray-900">
                   {searchResults.length === 0 ? (
-                    <p className="px-3 py-2 text-sm text-gray-500">No matching system function found</p>
+                    <p className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">No matching system function found</p>
                   ) : (
                     searchResults.map((result) => (
                       <button
@@ -98,8 +104,8 @@ export function Header({
                         className="w-full rounded-lg px-3 py-2 text-left"
                         onClick={() => onSelectSearchResult?.(result.tab)}
                       >
-                        <p className="text-sm font-medium text-gray-900">{result.label}</p>
-                        <p className="text-xs text-gray-600">{result.description}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{result.label}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{result.description}</p>
                       </button>
                     ))
                   )}
@@ -116,7 +122,7 @@ export function Header({
             {isAuthenticated ? (
               <div className="text-right">
                 <p className="text-xs text-gray-500">Signed in</p>
-                <p className="text-sm font-medium text-gray-900 max-w-[180px] truncate">{userEmail || "User"}</p>
+                <p className="text-sm font-medium text-gray-900 max-w-[180px] truncate dark:text-gray-100">{userEmail || "User"}</p>
               </div>
             ) : (
               <button
@@ -136,6 +142,16 @@ export function Header({
                 {activeAlerts}
               </Badge>
             )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onThemeToggle}
+            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
 
           <DropdownMenu>

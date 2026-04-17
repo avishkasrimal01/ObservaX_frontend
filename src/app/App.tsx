@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
 import { DashboardView } from "./components/DashboardView";
@@ -48,41 +47,35 @@ type SystemSearchItem = {
   keywords: string[];
 };
 
-const SESSION_TIMEOUT_MINUTES = Number(import.meta.env.VITE_SESSION_TIMEOUT_MINUTES || 30);
+type ThemeMode = "light" | "dark";
+
+const SESSION_TIMEOUT_MINUTES = Number(
+  ((import.meta as { env?: Record<string, string | undefined> }).env?.VITE_SESSION_TIMEOUT_MINUTES as string | undefined) ||
+    30,
+);
 const SESSION_TIMEOUT_MS = Math.max(1, SESSION_TIMEOUT_MINUTES) * 60 * 1000;
 const SESSION_CHECK_INTERVAL_MS = 30 * 1000;
+const THEME_STORAGE_KEY = "observerx-theme";
 
 const AUTH_TABS = new Set(["landing", "login", "signup"]);
 const ADMIN_ONLY_TABS = new Set(["admin-panel", "admin-users", "admin-payments", "admin-support"]);
 const ADMIN_ALLOWED_TABS = new Set(["admin-panel", "admin-users", "admin-payments", "admin-support", "profile"]);
-const TAB_ROUTES: Record<string, string> = {
-  landing: "/",
-  login: "/login",
-  signup: "/signup",
-  dashboard: "/dashboard",
-  websites: "/websites",
-  monitoring: "/monitoring",
-  alerts: "/alerts",
-  "ai-insights": "/ai-insights",
-  analytics: "/analytics",
-  settings: "/settings",
-  profile: "/profile",
-  billing: "/billing",
-  help: "/help",
-  support: "/support",
-  about: "/about",
-  "admin-panel": "/admin",
-  "admin-users": "/admin/users",
-  "admin-payments": "/admin/payments",
-  "admin-support": "/admin/support",
-  "subscription-onboarding": "/subscription",
-};
-const ROUTE_TABS = Object.fromEntries(
-  Object.entries(TAB_ROUTES).map(([tab, path]) => [path, tab]),
-) as Record<string, string>;
 
 function getDefaultTabForRole(isAdmin: boolean) {
   return isAdmin ? "admin-panel" : "dashboard";
+}
+
+function getInitialTheme(): ThemeMode {
+  const stored = localStorage.getItem(THEME_STORAGE_KEY);
+  if (stored === "light" || stored === "dark") {
+    return stored;
+  }
+
+  if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    return "dark";
+  }
+
+  return "light";
 }
 
 const systemSearchItems: SystemSearchItem[] = [
@@ -104,9 +97,16 @@ const systemSearchItems: SystemSearchItem[] = [
   { id: "admin-support", label: "Admin Support", description: "Respond to support chat messages", tab: "admin-support", keywords: ["admin", "support", "chat", "inbox"] },
 ];
 
+
 export default function App() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState(() => {
+    if (!localStorage.getItem("authToken")) {
+      return "landing";
+    }
+
+    const role = localStorage.getItem("userRole");
+    return role === "admin" ? "admin-panel" : "dashboard";
+  });
   const [websites, setWebsites] = useState<MonitoredWebsite[]>(() => loadMonitoredWebsites());
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => Boolean(localStorage.getItem("authToken")));
   const [userEmail, setUserEmail] = useState<string | null>(() => localStorage.getItem("userEmail"));
@@ -118,28 +118,13 @@ export default function App() {
   const [isSubscriptionLoading, setIsSubscriptionLoading] = useState<boolean>(false);
   const [currentSubscription, setCurrentSubscription] = useState<CurrentSubscription | null>(null);
   const [subscriptionHistory, setSubscriptionHistory] = useState<SubscriptionRecord[]>([]);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => getInitialTheme());
   const [searchQuery, setSearchQuery] = useState("");
   const [settings, setSettings] = useState<ObserverSettings>(() =>
-    loadObserverSettings(localStorage.getItem("userEmail") || "admin@example.com"),
+    loadObserverSettings(localStorage.getItem("userEmail") || "admin@example.com")
   );
 
-  const currentPath = useMemo(() => {
-    if (location.pathname.length > 1 && location.pathname.endsWith("/")) {
-      return location.pathname.slice(0, -1);
-    }
-    return location.pathname;
-  }, [location.pathname]);
-  const activeTab = ROUTE_TABS[currentPath] || null;
-
-  const navigateToTab = useCallback(
-    (tab: string, options?: { replace?: boolean }) => {
-      const path = TAB_ROUTES[tab] || TAB_ROUTES.dashboard;
-      if (path !== currentPath) {
-        navigate(path, { replace: options?.replace ?? false });
-      }
-    },
-    [currentPath, navigate],
-  );
+  const isDarkMode = themeMode === "dark";
 
   const handleLogout = useCallback(
     async (nextTab: "landing" | "login" = "landing", message = "") => {
@@ -162,12 +147,11 @@ export default function App() {
       setUserUid(null);
       setIsAdmin(false);
       setUserAvatarUrl(null);
-      setWebsites([]);
       setCurrentSubscription(null);
       setSubscriptionHistory([]);
-      navigateToTab(nextTab, { replace: true });
+      setActiveTab(nextTab);
     },
-    [navigateToTab],
+    [],
   );
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -187,7 +171,7 @@ export default function App() {
     : [];
 
   const handleSelectSearchResult = (tab: string) => {
-    navigateToTab(tab);
+    setActiveTab(tab);
     setSearchQuery("");
   };
 
@@ -204,6 +188,12 @@ export default function App() {
   useEffect(() => {
     saveObserverSettings(settings);
   }, [settings]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("dark", isDarkMode);
+    localStorage.setItem(THEME_STORAGE_KEY, themeMode);
+  }, [isDarkMode, themeMode]);
 
   useEffect(() => {
     if (!userEmail) return;
@@ -257,37 +247,24 @@ export default function App() {
   }, [isAuthenticated, userUid]);
 
   useEffect(() => {
-    if (activeTab) {
-      return;
-    }
-
     if (!isAuthenticated) {
-      navigateToTab("landing", { replace: true });
-      return;
-    }
-
-    navigateToTab(getDefaultTabForRole(isAdmin), { replace: true });
-  }, [activeTab, isAuthenticated, isAdmin, navigateToTab]);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      if (!activeTab || !AUTH_TABS.has(activeTab)) {
-        navigateToTab("landing", { replace: true });
+      if (!AUTH_TABS.has(activeTab)) {
+        setActiveTab("landing");
       }
       return;
     }
 
     if (isAdmin) {
-      if (!activeTab || !ADMIN_ALLOWED_TABS.has(activeTab)) {
-        navigateToTab(getDefaultTabForRole(true), { replace: true });
+      if (!ADMIN_ALLOWED_TABS.has(activeTab)) {
+        setActiveTab(getDefaultTabForRole(true));
       }
       return;
     }
 
-    if (!activeTab || ADMIN_ONLY_TABS.has(activeTab) || AUTH_TABS.has(activeTab)) {
-      navigateToTab(getDefaultTabForRole(false), { replace: true });
+    if (ADMIN_ONLY_TABS.has(activeTab) || AUTH_TABS.has(activeTab)) {
+      setActiveTab(getDefaultTabForRole(false));
     }
-  }, [activeTab, isAuthenticated, isAdmin, navigateToTab]);
+  }, [activeTab, isAuthenticated, isAdmin]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -363,7 +340,6 @@ export default function App() {
 
   useEffect(() => {
     if (!isAuthenticated || !userUid) {
-      setWebsites([]);
       return;
     }
 
@@ -388,41 +364,43 @@ export default function App() {
   }, [handleLogout, isAuthenticated, userUid]);
 
   useEffect(() => {
-    if (!isAuthenticated || !userUid) {
-      return;
-    }
-
     let cancelled = false;
 
     const hydrateFromBackend = async () => {
       try {
         const res = await fetchMonitoredWebsiteRecords();
-        if (cancelled) return;
+        if (cancelled || !res.websites?.length) return;
 
-        const nextWebsites = (res.websites || []).map((record) => ({
-          id: String(record.id ?? record.url),
-          uid: record.uid ?? userUid,
-          name: record.name || record.url,
-          url: record.url,
-          monitoring: record.monitoring ?? true,
-          status:
-            record.status === "down"
-              ? "down"
-              : record.status === "degraded"
-                ? "degraded"
-                : "operational",
-          uptime: typeof record.uptime === "number" ? record.uptime : 0,
-          responseTime: typeof record.responseTime === "number" ? record.responseTime : 0,
-          lastChecked: record.lastChecked || "Unknown",
-          scanError: record.scanError ?? null,
-          latest_runs: record.latest_runs ?? {},
-          httpResult: null,
-          domResult: null,
-          qaResult: null,
-          scanLoading: false,
-        }));
-
-        setWebsites(nextWebsites);
+        setWebsites((prev) => {
+          const byId = new Map(prev.map((w) => [w.id, w]));
+          for (const record of res.websites) {
+            const id = String(record.id ?? record.url);
+            const existing = byId.get(id);
+            byId.set(id, {
+              id,
+              name: record.name || existing?.name || record.url,
+              url: record.url,
+              monitoring: record.monitoring ?? existing?.monitoring ?? true,
+              status:
+                record.status === "down"
+                  ? "down"
+                  : record.status === "degraded"
+                    ? "degraded"
+                  : "operational",
+              uptime: typeof record.uptime === "number" ? record.uptime : existing?.uptime ?? 0,
+              responseTime:
+                typeof record.responseTime === "number" ? record.responseTime : existing?.responseTime ?? 0,
+              lastChecked: record.lastChecked || existing?.lastChecked || "Unknown",
+              scanError: record.scanError ?? existing?.scanError ?? null,
+              latest_runs: record.latest_runs ?? existing?.latest_runs ?? {},
+              httpResult: existing?.httpResult ?? null,
+              domResult: existing?.domResult ?? null,
+              qaResult: existing?.qaResult ?? null,
+              scanLoading: false,
+            });
+          }
+          return Array.from(byId.values());
+        });
       } catch {
         // Backend may be offline; keep local state.
       }
@@ -432,7 +410,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, userUid]);
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -463,7 +441,7 @@ export default function App() {
           <BillingView
             currentSubscription={currentSubscription}
             subscriptionHistory={subscriptionHistory}
-            onChangePlanClick={() => navigateToTab("subscription-onboarding")}
+            onChangePlanClick={() => setActiveTab("subscription-onboarding")}
           />
         );
       case "help":
@@ -523,36 +501,36 @@ export default function App() {
       case "login":
         return (
           <LoginPage
-            onSwitchMode={() => navigateToTab("signup")}
+            onSwitchMode={() => setActiveTab("signup")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              navigateToTab(getDefaultTabForRole(authedIsAdmin));
+              setActiveTab(getDefaultTabForRole(authedIsAdmin));
             }}
           />
         );
       case "signup":
         return (
           <SignupPage
-            onSwitchMode={() => navigateToTab("login")}
+            onSwitchMode={() => setActiveTab("login")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              navigateToTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding");
+              setActiveTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding");
             }}
           />
         );
       case "landing":
-        return <LandingPage onGetStarted={() => navigateToTab("login")} />;
+        return <LandingPage onGetStarted={() => setActiveTab("login")} />;
       case "subscription-onboarding":
         if (!userUid || !userEmail) {
-          return <LandingPage onGetStarted={() => navigateToTab("login")} />;
+          return <LandingPage onGetStarted={() => setActiveTab("login")} />;
         }
         return (
           <SubscriptionOnboardingView
@@ -564,7 +542,7 @@ export default function App() {
               void loadSubscriptionSnapshot(userUid).then((snapshot) => {
                 setSubscriptionHistory(snapshot.history);
               });
-              navigateToTab("dashboard");
+              setActiveTab("dashboard");
             }}
           />
         );
@@ -573,40 +551,44 @@ export default function App() {
     }
   };
 
+  const toggleThemeMode = () => {
+    setThemeMode((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-background">
         {accessDeniedMessage ? (
           <div className="mx-auto max-w-md px-4 pt-6">
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-900/30 dark:text-red-200">
               {accessDeniedMessage}
             </div>
           </div>
         ) : null}
         {activeTab === "landing" ? (
-          <LandingPage onGetStarted={() => navigateToTab("login")} />
+          <LandingPage onGetStarted={() => setActiveTab("login")} />
         ) : activeTab === "signup" ? (
           <SignupPage
-            onSwitchMode={() => navigateToTab("login")}
+            onSwitchMode={() => setActiveTab("login")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              navigateToTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding");
+              setActiveTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding");
             }}
           />
         ) : (
           <LoginPage
-            onSwitchMode={() => navigateToTab("signup")}
+            onSwitchMode={() => setActiveTab("signup")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              navigateToTab(getDefaultTabForRole(authedIsAdmin));
+              setActiveTab(getDefaultTabForRole(authedIsAdmin));
             }}
           />
         )}
@@ -617,9 +599,9 @@ export default function App() {
 
   if (isAuthenticated && isRoleLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
-          <p className="text-sm text-gray-600">Loading your access role...</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-background flex items-center justify-center px-4">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-700 dark:bg-gray-900/70">
+          <p className="text-sm text-gray-600 dark:text-gray-300">Loading your access role...</p>
         </div>
         <Toaster />
       </div>
@@ -628,9 +610,9 @@ export default function App() {
 
   if (!isAdmin && isSubscriptionLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
-          <p className="text-sm text-gray-600">Checking your subscription access...</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-background flex items-center justify-center px-4">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-700 dark:bg-gray-900/70">
+          <p className="text-sm text-gray-600 dark:text-gray-300">Checking your subscription access...</p>
         </div>
         <Toaster />
       </div>
@@ -639,7 +621,7 @@ export default function App() {
 
   if (!isAdmin && !currentSubscription) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-background">
         {userUid && userEmail ? (
           <SubscriptionOnboardingView
             userUid={userUid}
@@ -650,11 +632,11 @@ export default function App() {
               void loadSubscriptionSnapshot(userUid).then((snapshot) => {
                 setSubscriptionHistory(snapshot.history);
               });
-              navigateToTab("dashboard");
+              setActiveTab("dashboard");
             }}
           />
         ) : (
-          <LandingPage onGetStarted={() => navigateToTab("login")} />
+          <LandingPage onGetStarted={() => setActiveTab("login")} />
         )}
         <Toaster />
       </div>
@@ -662,7 +644,7 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-50 dark:bg-background">
       <Header
         activeAlerts={websites.filter((w) => w.monitoring && (w.status === "down" || !!w.scanError)).length}
         isAuthenticated={isAuthenticated}
@@ -673,30 +655,34 @@ export default function App() {
         onSearchChange={setSearchQuery}
         onSearchSubmit={handleSearchSubmit}
         onSelectSearchResult={handleSelectSearchResult}
-        onLoginClick={() => navigateToTab("login")}
-        onAlertsClick={() => navigateToTab("alerts")}
-        onProfileClick={() => navigateToTab("profile")}
-        onBillingClick={() => navigateToTab("billing")}
-        onSettingsClick={() => navigateToTab("settings")}
+        onLoginClick={() => setActiveTab("login")}
+        onAlertsClick={() => setActiveTab("alerts")}
+        onProfileClick={() => setActiveTab("profile")}
+        onBillingClick={() => setActiveTab("billing")}
+        onSettingsClick={() => setActiveTab("settings")}
+        themeMode={themeMode}
+        onThemeToggle={toggleThemeMode}
         onLogoutClick={() => {
           void handleLogout("landing");
         }}
       />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar activeTab={activeTab || ""} onTabChange={navigateToTab} isAdmin={isAdmin} />
+        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} isAdmin={isAdmin} />
         <main
           className="flex-1 overflow-y-auto p-8"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(248, 250, 252, 0.9), rgba(248, 250, 252, 0.9)), url('https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1800&q=80')",
+              isDarkMode
+                ? "linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)), url('https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1800&q=80')"
+                : "linear-gradient(rgba(248, 250, 252, 0.9), rgba(248, 250, 252, 0.9)), url('https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1800&q=80')",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
-          <div className="rounded-2xl bg-gradient-to-br from-cyan-100/30 via-white/35 to-violet-100/30 p-4 sm:p-6">
+          <div className="rounded-2xl bg-gradient-to-br from-cyan-100/30 via-white/35 to-violet-100/30 p-4 sm:p-6 dark:from-slate-900/55 dark:via-slate-800/45 dark:to-blue-950/55">
             {renderContent()}
           </div>
-          <SystemFooter onNavigate={navigateToTab} />
+          <SystemFooter onNavigate={setActiveTab} />
         </main>
       </div>
       <Toaster />
