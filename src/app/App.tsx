@@ -58,8 +58,8 @@ const SESSION_CHECK_INTERVAL_MS = 30 * 1000;
 const THEME_STORAGE_KEY = "observerx-theme";
 
 const AUTH_TABS = new Set(["landing", "login", "signup"]);
-const ADMIN_ONLY_TABS = new Set(["admin-panel", "admin-users", "admin-payments", "admin-support"]);
-const ADMIN_ALLOWED_TABS = new Set(["admin-panel", "admin-users", "admin-payments", "admin-support", "profile"]);
+const ADMIN_ONLY_TABS = new Set(["admin-panel", "admin-users", "admin-payments", "admin-reports", "admin-support"]);
+const ADMIN_ALLOWED_TABS = new Set(["admin-panel", "admin-users", "admin-payments", "admin-reports", "admin-support", "profile"]);
 
 function getDefaultTabForRole(isAdmin: boolean) {
   return isAdmin ? "admin-panel" : "dashboard";
@@ -94,6 +94,7 @@ const systemSearchItems: SystemSearchItem[] = [
   { id: "admin-panel", label: "Admin Overview", description: "Summary of all admin operations and analytics", tab: "admin-panel", keywords: ["admin", "overview", "operations", "control"] },
   { id: "admin-users", label: "Admin Users", description: "Manage user accounts, roles, and account status", tab: "admin-users", keywords: ["admin", "users", "account", "access"] },
   { id: "admin-payments", label: "Admin Payments", description: "Review payment history and billing records", tab: "admin-payments", keywords: ["admin", "payments", "billing", "transactions"] },
+  { id: "admin-reports", label: "Admin Reports", description: "Generate downloadable platform reports", tab: "admin-reports", keywords: ["admin", "reports", "export", "csv", "json"] },
   { id: "admin-support", label: "Admin Support", description: "Respond to support chat messages", tab: "admin-support", keywords: ["admin", "support", "chat", "inbox"] },
 ];
 
@@ -481,6 +482,18 @@ export default function App() {
             isAdmin={isAdmin}
             websites={websites}
             defaultSection="payments"
+            showSectionTabs={false}
+          />
+        ) : (
+          <DashboardView websites={websites} />
+        );
+      case "admin-reports":
+        return isAdmin ? (
+          <AdminPanelView
+            userEmail={userEmail}
+            isAdmin={isAdmin}
+            websites={websites}
+            defaultSection="reports"
             showSectionTabs={false}
           />
         ) : (

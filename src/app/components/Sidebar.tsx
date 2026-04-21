@@ -10,6 +10,7 @@ import {
   Users,
   CreditCard,
   MessageSquare,
+  FileText,
   BarChart3,
   HelpCircle,
   LifeBuoy,
@@ -38,6 +39,7 @@ const adminMenuItems = [
   { id: "admin-panel", label: "Admin Overview", icon: Shield },
   { id: "admin-users", label: "Admin Users", icon: Users },
   { id: "admin-payments", label: "Admin Payments", icon: CreditCard },
+  { id: "admin-reports", label: "Admin Reports", icon: FileText },
   { id: "admin-support", label: "Admin Support", icon: MessageSquare },
   { id: "profile", label: "Profile", icon: User },
 ];

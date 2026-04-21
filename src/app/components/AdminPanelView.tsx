@@ -45,12 +45,15 @@ interface AdminPanelViewProps {
   showSectionTabs?: boolean;
 }
 
-type AdminSection = "overview" | "users" | "payments" | "support";
+type AdminSection = "overview" | "users" | "payments" | "reports" | "support";
+type ReportType = "system-summary" | "users" | "payments" | "support" | "websites";
+type ReportFormat = "csv" | "json";
 
 const adminSectionItems: Array<{ id: AdminSection; label: string }> = [
   { id: "overview", label: "Overview" },
   { id: "users", label: "Users" },
   { id: "payments", label: "Payments" },
+  { id: "reports", label: "Reports" },
   { id: "support", label: "Support" },
 ];
 
@@ -116,6 +119,41 @@ function formatDate(iso: string) {
   return date.toLocaleString();
 }
 
+function escapeCsvCell(value: unknown): string {
+  const text = String(value ?? "");
+  if (/[,"\n]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
+function toCsv(rows: Array<Record<string, unknown>>): string {
+  if (rows.length === 0) {
+    return "";
+  }
+
+  const headers = Object.keys(rows[0]);
+  const lines = [headers.map((header) => escapeCsvCell(header)).join(",")];
+
+  rows.forEach((row) => {
+    lines.push(headers.map((header) => escapeCsvCell(row[header])).join(","));
+  });
+
+  return lines.join("\n");
+}
+
+function downloadReport(content: string, fileName: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 export function AdminPanelView({
   userEmail,
   isAdmin,
@@ -144,6 +182,9 @@ export function AdminPanelView({
   const [isSendingSupportReply, setIsSendingSupportReply] = useState<boolean>(false);
   const [isClearingSupportChat, setIsClearingSupportChat] = useState<boolean>(false);
   const [deletingSupportMessageId, setDeletingSupportMessageId] = useState<string>("");
+  const [reportType, setReportType] = useState<ReportType>("system-summary");
+  const [reportFormat, setReportFormat] = useState<ReportFormat>("csv");
+  const [reportMessage, setReportMessage] = useState<string>("");
 
   useEffect(() => {
     setActiveSection(defaultSection);
@@ -516,6 +557,76 @@ export function AdminPanelView({
     [supportConversations, selectedSupportUid],
   );
 
+  const reportRows = useMemo<Array<Record<string, unknown>>>(() => {
+    const reportWebsites = adminWebsites.length > 0 ? adminWebsites : websites;
+
+    if (reportType === "system-summary") {
+      return [
+        {
+          generatedAt: new Date().toISOString(),
+          totalAccounts: users.length,
+          totalPayments: payments.length,
+          totalRevenueCents: payments.reduce((sum, payment) => sum + payment.amountCents, 0),
+          monitoredWebsites: reportWebsites.length,
+          monitoringEnabled: reportWebsites.filter((site) => site.monitoring).length,
+          websitesDown: reportWebsites.filter((site) => site.status === "down").length,
+          websitesDegraded: reportWebsites.filter((site) => site.status === "degraded").length,
+          supportMessageCount: supportMessages.length,
+        },
+      ];
+    }
+
+    if (reportType === "users") {
+      return users.map((user) => ({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        role: user.role,
+        accessLevel: user.accessLevel,
+        accountStatus: user.accountStatus,
+        planName: user.planName,
+        subscriptionStatus: user.subscriptionStatus,
+      }));
+    }
+
+    if (reportType === "payments") {
+      return payments.map((payment) => ({
+        id: payment.id,
+        uid: payment.uid,
+        email: payment.email,
+        planName: payment.planName,
+        amountCents: payment.amountCents,
+        currency: payment.currency,
+        status: payment.status,
+        last4: payment.last4,
+        createdAtISO: payment.createdAtISO,
+      }));
+    }
+
+    if (reportType === "support") {
+      return supportMessages.map((entry) => ({
+        id: entry.id,
+        uid: entry.uid,
+        email: entry.email,
+        role: entry.role,
+        text: entry.text,
+        createdAtISO: entry.createdAtISO,
+      }));
+    }
+
+    return reportWebsites.map((site) => ({
+      id: site.id,
+      uid: site.uid,
+      name: site.name,
+      url: site.url,
+      monitoring: site.monitoring,
+      status: site.status,
+      uptime: site.uptime,
+      responseTime: site.responseTime,
+      lastChecked: site.lastChecked,
+    }));
+  }, [adminWebsites, websites, reportType, users, payments, supportMessages]);
+
   const handleSendAdminReply = async () => {
     const text = adminReplyInput.trim();
     if (!text || !selectedSupportUid) {
@@ -591,6 +702,42 @@ export function AdminPanelView({
       setDataError("Failed to clear support conversation.");
     } finally {
       setIsClearingSupportChat(false);
+    }
+  };
+
+  const handleGenerateReport = () => {
+    setDataError("");
+    setReportMessage("");
+
+    try {
+      if (reportRows.length === 0) {
+        setReportMessage("No data is available for the selected report.");
+        return;
+      }
+
+      const timestamp = new Date().toISOString().replace(/[.:]/g, "-");
+      const reportName = reportType.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+
+      if (reportFormat === "json") {
+        const payload = JSON.stringify(
+          {
+            generatedAt: new Date().toISOString(),
+            reportType,
+            rowCount: reportRows.length,
+            rows: reportRows,
+          },
+          null,
+          2,
+        );
+        downloadReport(payload, `observerx-${reportName}-${timestamp}.json`, "application/json;charset=utf-8");
+      } else {
+        const csvContent = toCsv(reportRows);
+        downloadReport(csvContent, `observerx-${reportName}-${timestamp}.csv`, "text/csv;charset=utf-8");
+      }
+
+      setReportMessage(`Downloaded ${reportRows.length} rows as ${reportFormat.toUpperCase()}.`);
+    } catch {
+      setDataError("Failed to generate report file.");
     }
   };
 
@@ -903,6 +1050,68 @@ export function AdminPanelView({
                     )}
                   </TableBody>
                 </Table>
+              </div>
+            </div>
+          ) : null}
+
+          {activeSection === "reports" ? (
+            <div className="space-y-3">
+              <h3 className="text-base font-semibold text-gray-900">Report Generation</h3>
+              <p className="text-sm text-gray-600">
+                Build downloadable admin reports for users, payments, support messages, websites, and platform summary.
+              </p>
+
+              <div className="grid gap-3 rounded-lg border bg-white p-3 md:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="report-type"
+                    className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500"
+                  >
+                    Report Type
+                  </label>
+                  <select
+                    id="report-type"
+                    className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm outline-none ring-offset-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    value={reportType}
+                    onChange={(event) => setReportType(event.target.value as ReportType)}
+                  >
+                    <option value="system-summary">System Summary</option>
+                    <option value="users">Users</option>
+                    <option value="payments">Payments</option>
+                    <option value="support">Support Messages</option>
+                    <option value="websites">Websites</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="report-format"
+                    className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500"
+                  >
+                    File Format
+                  </label>
+                  <select
+                    id="report-format"
+                    className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm outline-none ring-offset-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    value={reportFormat}
+                    onChange={(event) => setReportFormat(event.target.value as ReportFormat)}
+                  >
+                    <option value="csv">CSV</option>
+                    <option value="json">JSON</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="rounded-lg border bg-white p-3">
+                <p className="text-sm text-gray-700">
+                  Preview: <span className="font-semibold">{reportRows.length}</span> rows available for export.
+                </p>
+                <div className="mt-3">
+                  <Button type="button" onClick={handleGenerateReport}>
+                    Generate and Download Report
+                  </Button>
+                </div>
+                {reportMessage ? <p className="mt-2 text-sm text-emerald-700">{reportMessage}</p> : null}
               </div>
             </div>
           ) : null}
