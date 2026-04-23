@@ -38,6 +38,7 @@ import {
   type SubscriptionRecord,
 } from "./lib/subscriptionStore";
 import { firebaseAuth, firebaseDb } from "./lib/firebaseClient";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type SystemSearchItem = {
   id: string;
@@ -61,8 +62,74 @@ const AUTH_TABS = new Set(["landing", "login", "signup"]);
 const ADMIN_ONLY_TABS = new Set(["admin-panel", "admin-users", "admin-payments", "admin-reports", "admin-support"]);
 const ADMIN_ALLOWED_TABS = new Set(["admin-panel", "admin-users", "admin-payments", "admin-reports", "admin-support", "profile"]);
 
+const TAB_TO_PATH: Record<string, string> = {
+  landing: "/",
+  login: "/login",
+  signup: "/signup",
+  dashboard: "/dashboard",
+  websites: "/websites",
+  monitoring: "/monitoring",
+  alerts: "/alerts",
+  "ai-insights": "/ai-insights",
+  analytics: "/analytics",
+  settings: "/settings",
+  profile: "/profile",
+  billing: "/billing",
+  help: "/help",
+  support: "/support",
+  about: "/about",
+  "admin-panel": "/admin",
+  "admin-users": "/admin/users",
+  "admin-payments": "/admin/payments",
+  "admin-reports": "/admin/reports",
+  "admin-support": "/admin/support",
+  "subscription-onboarding": "/subscription-onboarding",
+};
+
+const PATH_TO_TAB: Record<string, string> = {
+  "/": "landing",
+  "/landing": "landing",
+  "/login": "login",
+  "/signup": "signup",
+  "/dashboard": "dashboard",
+  "/websites": "websites",
+  "/monitoring": "monitoring",
+  "/alerts": "alerts",
+  "/ai-insights": "ai-insights",
+  "/analytics": "analytics",
+  "/settings": "settings",
+  "/profile": "profile",
+  "/billing": "billing",
+  "/help": "help",
+  "/support": "support",
+  "/about": "about",
+  "/admin": "admin-panel",
+  "/admin/users": "admin-users",
+  "/admin/payments": "admin-payments",
+  "/admin/reports": "admin-reports",
+  "/admin/support": "admin-support",
+  "/subscription-onboarding": "subscription-onboarding",
+};
+
 function getDefaultTabForRole(isAdmin: boolean) {
   return isAdmin ? "admin-panel" : "dashboard";
+}
+
+function normalizePathname(pathname: string): string {
+  if (!pathname) return "/";
+  if (pathname.length > 1 && pathname.endsWith("/")) {
+    return pathname.slice(0, -1);
+  }
+  return pathname;
+}
+
+function getTabForPath(pathname: string): string | null {
+  const normalizedPathname = normalizePathname(pathname);
+  return PATH_TO_TAB[normalizedPathname] ?? null;
+}
+
+function getPathForTab(tab: string): string {
+  return TAB_TO_PATH[tab] ?? TAB_TO_PATH.dashboard;
 }
 
 function getInitialTheme(): ThemeMode {
@@ -100,14 +167,8 @@ const systemSearchItems: SystemSearchItem[] = [
 
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState(() => {
-    if (!localStorage.getItem("authToken")) {
-      return "landing";
-    }
-
-    const role = localStorage.getItem("userRole");
-    return role === "admin" ? "admin-panel" : "dashboard";
-  });
+  const navigate = useNavigate();
+  const location = useLocation();
   const [websites, setWebsites] = useState<MonitoredWebsite[]>(() => loadMonitoredWebsites());
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => Boolean(localStorage.getItem("authToken")));
   const [userEmail, setUserEmail] = useState<string | null>(() => localStorage.getItem("userEmail"));
@@ -123,6 +184,16 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [settings, setSettings] = useState<ObserverSettings>(() =>
     loadObserverSettings(localStorage.getItem("userEmail") || "admin@example.com")
+  );
+
+  const activeTabFromPath = getTabForPath(location.pathname);
+  const activeTab = activeTabFromPath ?? (isAuthenticated ? getDefaultTabForRole(isAdmin) : "landing");
+
+  const navigateToTab = useCallback(
+    (tab: string, options?: { replace?: boolean }) => {
+      navigate(getPathForTab(tab), { replace: options?.replace ?? false });
+    },
+    [navigate],
   );
 
   const isDarkMode = themeMode === "dark";
@@ -150,9 +221,9 @@ export default function App() {
       setUserAvatarUrl(null);
       setCurrentSubscription(null);
       setSubscriptionHistory([]);
-      setActiveTab(nextTab);
+      navigateToTab(nextTab, { replace: true });
     },
-    [],
+    [navigateToTab],
   );
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -172,7 +243,7 @@ export default function App() {
     : [];
 
   const handleSelectSearchResult = (tab: string) => {
-    setActiveTab(tab);
+    navigateToTab(tab);
     setSearchQuery("");
   };
 
@@ -181,6 +252,14 @@ export default function App() {
       handleSelectSearchResult(searchResults[0].tab);
     }
   };
+
+  useEffect(() => {
+    if (activeTabFromPath) {
+      return;
+    }
+
+    navigateToTab(isAuthenticated ? getDefaultTabForRole(isAdmin) : "landing", { replace: true });
+  }, [activeTabFromPath, isAuthenticated, isAdmin, navigateToTab]);
 
   useEffect(() => {
     saveMonitoredWebsites(websites);
@@ -250,22 +329,22 @@ export default function App() {
   useEffect(() => {
     if (!isAuthenticated) {
       if (!AUTH_TABS.has(activeTab)) {
-        setActiveTab("landing");
+        navigateToTab("landing", { replace: true });
       }
       return;
     }
 
     if (isAdmin) {
       if (!ADMIN_ALLOWED_TABS.has(activeTab)) {
-        setActiveTab(getDefaultTabForRole(true));
+        navigateToTab(getDefaultTabForRole(true), { replace: true });
       }
       return;
     }
 
     if (ADMIN_ONLY_TABS.has(activeTab) || AUTH_TABS.has(activeTab)) {
-      setActiveTab(getDefaultTabForRole(false));
+      navigateToTab(getDefaultTabForRole(false), { replace: true });
     }
-  }, [activeTab, isAuthenticated, isAdmin]);
+  }, [activeTab, isAuthenticated, isAdmin, navigateToTab]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -442,7 +521,7 @@ export default function App() {
           <BillingView
             currentSubscription={currentSubscription}
             subscriptionHistory={subscriptionHistory}
-            onChangePlanClick={() => setActiveTab("subscription-onboarding")}
+            onChangePlanClick={() => navigateToTab("subscription-onboarding")}
           />
         );
       case "help":
@@ -516,14 +595,14 @@ export default function App() {
           <LoginPage
             themeMode={themeMode}
             onThemeToggle={toggleThemeMode}
-            onSwitchMode={() => setActiveTab("signup")}
+            onSwitchMode={() => navigateToTab("signup")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              setActiveTab(getDefaultTabForRole(authedIsAdmin));
+              navigateToTab(getDefaultTabForRole(authedIsAdmin), { replace: true });
             }}
           />
         );
@@ -532,22 +611,22 @@ export default function App() {
           <SignupPage
             themeMode={themeMode}
             onThemeToggle={toggleThemeMode}
-            onSwitchMode={() => setActiveTab("login")}
+            onSwitchMode={() => navigateToTab("login")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              setActiveTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding");
+              navigateToTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding", { replace: true });
             }}
           />
         );
       case "landing":
-        return <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => setActiveTab("login")} />;
+        return <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => navigateToTab("login")} />;
       case "subscription-onboarding":
         if (!userUid || !userEmail) {
-          return <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => setActiveTab("login")} />;
+          return <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => navigateToTab("login")} />;
         }
         return (
           <SubscriptionOnboardingView
@@ -559,7 +638,7 @@ export default function App() {
               void loadSubscriptionSnapshot(userUid).then((snapshot) => {
                 setSubscriptionHistory(snapshot.history);
               });
-              setActiveTab("dashboard");
+              navigateToTab("dashboard", { replace: true });
             }}
           />
         );
@@ -583,33 +662,33 @@ export default function App() {
           </div>
         ) : null}
         {activeTab === "landing" ? (
-          <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => setActiveTab("login")} />
+          <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => navigateToTab("login")} />
         ) : activeTab === "signup" ? (
           <SignupPage
             themeMode={themeMode}
             onThemeToggle={toggleThemeMode}
-            onSwitchMode={() => setActiveTab("login")}
+            onSwitchMode={() => navigateToTab("login")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              setActiveTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding");
+              navigateToTab(authedIsAdmin ? getDefaultTabForRole(true) : "subscription-onboarding", { replace: true });
             }}
           />
         ) : (
           <LoginPage
             themeMode={themeMode}
             onThemeToggle={toggleThemeMode}
-            onSwitchMode={() => setActiveTab("signup")}
+            onSwitchMode={() => navigateToTab("signup")}
             onAuthSuccess={({ email, uid, isAdmin: authedIsAdmin }) => {
               setAccessDeniedMessage("");
               setIsAuthenticated(true);
               setUserEmail(email);
               setUserUid(uid);
               setIsAdmin(authedIsAdmin);
-              setActiveTab(getDefaultTabForRole(authedIsAdmin));
+              navigateToTab(getDefaultTabForRole(authedIsAdmin), { replace: true });
             }}
           />
         )}
@@ -653,11 +732,11 @@ export default function App() {
               void loadSubscriptionSnapshot(userUid).then((snapshot) => {
                 setSubscriptionHistory(snapshot.history);
               });
-              setActiveTab("dashboard");
+              navigateToTab("dashboard", { replace: true });
             }}
           />
         ) : (
-          <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => setActiveTab("login")} />
+          <LandingPage themeMode={themeMode} onThemeToggle={toggleThemeMode} onGetStarted={() => navigateToTab("login")} />
         )}
         <Toaster />
       </div>
@@ -678,11 +757,11 @@ export default function App() {
         onSearchChange={setSearchQuery}
         onSearchSubmit={handleSearchSubmit}
         onSelectSearchResult={handleSelectSearchResult}
-        onLoginClick={() => setActiveTab("login")}
-        onAlertsClick={() => setActiveTab("alerts")}
-        onProfileClick={() => setActiveTab("profile")}
-        onBillingClick={() => setActiveTab("billing")}
-        onSettingsClick={() => setActiveTab("settings")}
+        onLoginClick={() => navigateToTab("login")}
+        onAlertsClick={() => navigateToTab("alerts")}
+        onProfileClick={() => navigateToTab("profile")}
+        onBillingClick={() => navigateToTab("billing")}
+        onSettingsClick={() => navigateToTab("settings")}
         themeMode={themeMode}
         onThemeToggle={toggleThemeMode}
         onLogoutClick={() => {
@@ -690,7 +769,7 @@ export default function App() {
         }}
       />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} isAdmin={isAdmin} />
+        <Sidebar activeTab={activeTab} onTabChange={navigateToTab} isAdmin={isAdmin} />
         <main
           className="flex-1 overflow-y-auto p-8"
           style={{
@@ -705,7 +784,7 @@ export default function App() {
           <div className="rounded-2xl bg-gradient-to-br from-cyan-100/30 via-white/35 to-violet-100/30 p-4 sm:p-6 dark:from-slate-900/55 dark:via-slate-800/45 dark:to-blue-950/55">
             {renderContent()}
           </div>
-          <SystemFooter onNavigate={setActiveTab} />
+          <SystemFooter onNavigate={navigateToTab} />
         </main>
       </div>
       <Toaster />
