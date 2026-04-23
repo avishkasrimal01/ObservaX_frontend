@@ -17,6 +17,7 @@ interface HeaderProps {
   isAuthenticated?: boolean;
   userEmail?: string | null;
   userAvatarUrl?: string | null;
+  hideAlertsButton?: boolean;
   searchQuery?: string;
   searchResults?: Array<{ id: string; label: string; description: string; tab: string }>;
   onSearchChange?: (value: string) => void;
@@ -37,6 +38,7 @@ export function Header({
   isAuthenticated = false,
   userEmail,
   userAvatarUrl,
+  hideAlertsButton = false,
   searchQuery = "",
   searchResults = [],
   onSearchChange,
@@ -135,14 +137,16 @@ export function Header({
             )}
           </div>
 
-          <Button variant="ghost" size="icon" className="relative" onClick={onAlertsClick}>
-            <Bell className="h-5 w-5" />
-            {activeAlerts > 0 && (
-              <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs">
-                {activeAlerts}
-              </Badge>
-            )}
-          </Button>
+          {!hideAlertsButton ? (
+            <Button variant="ghost" size="icon" className="relative" onClick={onAlertsClick}>
+              <Bell className="h-5 w-5" />
+              {activeAlerts > 0 && (
+                <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs">
+                  {activeAlerts}
+                </Badge>
+              )}
+            </Button>
+          ) : null}
 
           <Button
             variant="ghost"

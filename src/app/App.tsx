@@ -671,6 +671,7 @@ export default function App() {
         isAuthenticated={isAuthenticated}
         userEmail={userEmail}
         userAvatarUrl={userAvatarUrl}
+        hideAlertsButton={isAdmin && activeTab === "admin-panel"}
         searchQuery={searchQuery}
         searchResults={searchResults}
         onSearchChange={setSearchQuery}
