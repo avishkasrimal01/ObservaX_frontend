@@ -18,6 +18,7 @@ interface HeaderProps {
   userEmail?: string | null;
   userAvatarUrl?: string | null;
   hideAlertsButton?: boolean;
+  hideSettingsAndBilling?: boolean;
   searchQuery?: string;
   searchResults?: Array<{ id: string; label: string; description: string; tab: string }>;
   onSearchChange?: (value: string) => void;
@@ -39,6 +40,7 @@ export function Header({
   userEmail,
   userAvatarUrl,
   hideAlertsButton = false,
+  hideSettingsAndBilling = false,
   searchQuery = "",
   searchResults = [],
   onSearchChange,
@@ -172,12 +174,14 @@ export function Header({
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onSettingsClick}>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </DropdownMenuItem>
+              {!hideSettingsAndBilling ? (
+                <DropdownMenuItem onClick={onSettingsClick}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+              ) : null}
               <DropdownMenuItem onClick={onProfileClick}>Profile</DropdownMenuItem>
-              <DropdownMenuItem onClick={onBillingClick}>Billing</DropdownMenuItem>
+              {!hideSettingsAndBilling ? <DropdownMenuItem onClick={onBillingClick}>Billing</DropdownMenuItem> : null}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onLogoutClick}>Log out</DropdownMenuItem>
             </DropdownMenuContent>
