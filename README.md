@@ -1,13 +1,11 @@
-# Project Name - ObservaX  A Web-Based Platform for Optimizing Browser Synthetic Monitoring with AI Agents 
+# ObservaX - A Web-Based Platform for Optimizing Browser Synthetic Monitoring with AI Agents 
 ## Final Year Undergraduate Project
-
-### Group Members 
 
 ## Project Description
 
 <table border="0">
   <tr>
-    <td><img src="https://github.com/avishkasrimal01/PatientPulse-Smart-Medical-Clinic-Management-System/blob/main/images/logo.jpg" height="200" width="200" ></td>
+    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/ObservaX%20logo%201.jpg" height="200" width="200" ></td>
     <td><img src="https://github.com/avishkasrimal01/PatientPulse-Smart-Medical-Clinic-Management-System/blob/main/images/poster.jpg" height="200" width="200" ></td>
   </tr>
  </table><br>
