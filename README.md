@@ -24,7 +24,8 @@ Designed and developed an AI-powered enterprise observability platform that enha
     <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/Langchain--Streamline-Simple-Icons.svg" height="60" width="60" ></td>
     <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/Neo4j--Streamline-Svg-Logos.svg" height="60" width="60" ></td>
     <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/Playwright--Streamline-Svg-Logos.svg" height="60" width="60" ></td>
-    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/0_zMw_ZqknEMU6exoU%20copy.webp" height="60" width="60" ></td>>
+    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/0_zMw_ZqknEMU6exoU%20copy.webp" height="60" width="60" ></td>
+    <td><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/node/node-original-wordmark.svg" height="60" width="60" ></td>
   </tr>
 </table><br>
 
