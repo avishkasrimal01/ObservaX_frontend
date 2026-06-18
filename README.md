@@ -31,22 +31,21 @@ Designed and developed an AI-powered enterprise observability platform that enha
 ## Prerequisites
 1. VS code should be installed.
 2. node has been installed to the machine.
+3. Python (3.x) should be installed.
+4. pip (Python package manager) should be available.
 
 ## Procedure of setting up prerequisites and run the project
 1.	Download a zip folder of this project and unzip or clone the repository.
 2.	Open the project in vs code.
 3.	Open a new terminal.
-4.	Navigate to Patient-Pulse-Admin-Web folder -> cd Patient-Pulse-Admin-Web.
-5.	Navigate to Front folder -> cd Front.
-6.	Type ‘npm install’ and click enter.
-7.	After the node modules getting downloaded, type ‘npm start’ and click enter.
-8.	Navigate to Back -> cd Back.
-9.	Type ‘npm install’ and click enter.
-10.	After the node modules getting downloaded, type ‘npm start’.
-11.	(Do the same for the Patient-Pulse-Client-Web folder as above.)
-12.	Open the Patient-Pulse-IoT file in Arduino.
+4.	Type ‘npm install’ and click enter.
+5.	After the node modules getting downloaded, type ‘npm run dev’ and click enter.
+6.	Open the web browser and navigate to "http://localhost:5173"
+7.  The frontend application will be displayed 
+8.  Admin Credentials: admin@gmail.com | PW - asd123   
 
-## Client Web Application
+
+## User Web Application
 
 <table border="0">
   <tr>
