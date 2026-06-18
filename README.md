@@ -18,7 +18,7 @@ Designed and developed an AI-powered enterprise observability platform that enha
 <table border="0">
   <tr>
     <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/google-firebase-icon.svg" height="60" width="60" ></td>
-    <td><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/arduino/arduino-original-wordmark.svg" height="60" width="60" ></td>
+    <td><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original-wordmark.svg" height="60" width="60" ></td>
     <td><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original-wordmark.svg" height="60" width="60" ></td>
     <td><img src="https://github.com/avishkasrimal01/PatientPulse-Smart-Medical-Clinic-Management-System/blob/main/images/nodejs.webp" height="60" width="60" ></td>
     <td><img src="https://github.com/avishkasrimal01/PatientPulse-Smart-Medical-Clinic-Management-System/blob/main/images/mongo.webp" height="60" width="60" ></td>
