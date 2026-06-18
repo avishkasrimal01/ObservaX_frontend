@@ -40,8 +40,8 @@ Designed and developed an AI-powered enterprise observability platform that enha
 3.	Open a new terminal.
 4.	Type ‘npm install’ and click enter.
 5.	After the node modules getting downloaded, type ‘npm run dev’ and click enter.
-6.	Open the web browser and navigate to "http://localhost:5173"
-7.  The frontend application will be displayed 
+6.	Open the web browser and navigate to "http://localhost:5173".
+7.  The frontend application will be displayed.
 8.  Admin Credentials: admin@gmail.com | PW - asd123   
 
 
