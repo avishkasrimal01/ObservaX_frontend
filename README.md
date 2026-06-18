@@ -5,10 +5,11 @@
 
 Designed and developed an AI-powered enterprise observability platform that enhances browser synthetic monitoring through intelligent automation, explainable AI, and predictive analytics. ObservaX continuously monitors web applications using AI-driven synthetic agents, detects performance anomalies, broken links, DOM changes, browser errors, and latency issues, and provides real-time observability insights through interactive dashboards. The platform integrates Reinforcement Learning-based agents for adaptive monitoring, Natural Language Processing (NLP) for automated incident diagnosis, and vector-based historical incident intelligence using Neo4j to generate contextual root cause analysis, remediation recommendations, and preventive actions. The system features intelligent alert orchestration, anomaly detection, self-healing monitoring workflows, historical trend analysis, and AI-generated operational insights to reduce manual debugging efforts and improve enterprise application reliability.
 
+
 <table border="0">
   <tr>
-    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/ObservaX%20logo%201.jpg" height="200" width="200" ></td>
-    <td><img src="https://github.com/avishkasrimal01/PatientPulse-Smart-Medical-Clinic-Management-System/blob/main/images/poster.jpg" height="200" width="200" ></td>
+    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/ObservaX%20logo%201.jpg" height="250" width="250" ></td>
+    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/2.jpg" height="250" width="250" ></td>
   </tr>
  </table><br>
 
