@@ -21,11 +21,10 @@ Designed and developed an AI-powered enterprise observability platform that enha
     <td><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original-wordmark.svg" height="60" width="60" ></td>
     <td><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original-wordmark.svg" height="60" width="60" ></td>
     <td><img src="https://github.com/avishkasrimal01/PatientPulse-Smart-Medical-Clinic-Management-System/blob/main/images/nodejs.webp" height="60" width="60" ></td>
-    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/Langchain--Streamline-Simple-Icons.svg" height="60" width="60" ></td>
-    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/Neo4j--Streamline-Svg-Logos.svg" height="60" width="60" ></td>
+    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/lang.png" height="60" width="60" ></td>
+    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/neo4j.png" height="60" width="60" ></td>
     <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/Playwright--Streamline-Svg-Logos.svg" height="60" width="60" ></td>
-    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/0_zMw_ZqknEMU6exoU%20copy.webp" height="60" width="60" ></td>
-    <td><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/node/node-original-wordmark.svg" height="60" width="60" ></td>
+    <td><img src="https://github.com/avishkasrimal01/ObservaX_frontend/blob/main/images/0_zMw_ZqknEMU6exoU.webp" height="60" width="60" ></td>
   </tr>
 </table><br>
 
