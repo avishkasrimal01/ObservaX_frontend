@@ -1,16 +1,7 @@
-# Project Name - PatientPulse Smart Medical Clinic Management System
-## Group No : 13
-## Batch - Y2.S2
+# Project Name - ObservaX  A Web-Based Platform for Optimizing Browser Synthetic Monitoring with AI Agents 
+## Final Year Undergraduate Project
 
 ### Group Members 
-
-#### - SA23081666 – H.K.A.S. Sanjeewa 
-#### - SA23098732 – A.N.R. de Silva 
-#### - SA23127500 – G.C.N.D. Dayathilaka 
-#### - SA23081116 – D.L.Y.R. Peiris 
-#### - SA23102132 – T.G.A.K. Thambavita
-
-<br>
 
 ## Project Description
 
@@ -21,11 +12,8 @@
   </tr>
  </table><br>
  
-Patient Pulse is an innovative Ayurvedic medical center management system designed to revolutionize healthcare administration and patient care. By leveraging cutting-edge technologies like React.js, Node.js, MongoDB, Firebase, and Arduino, this comprehensive platform offers a robust solution for managing patient records, appointment scheduling, treatment histories, and inventory tracking seamlessly.
-At its core, Patient Pulse aims to enhance healthcare accessibility and optimize resource management. It provides a secure and centralized database for storing and accessing medical records, ensuring sensitive information is handled with utmost confidentiality. The system empowers healthcare providers with real-time insights and intelligent recommendations for personalized treatment plans, thereby improving clinical decision-making and patient outcomes.
-The user-friendly web application facilitates easy access to patient information for doctors and staff, promoting efficiency and reducing administrative overhead. Appointment scheduling features streamline patient visits, minimizing wait times and enhancing overall clinic operations. Through integrated IoT capabilities using Arduino, the system can also monitor and manage medical equipment and environmental conditions, ensuring optimal patient care environments.
-Patient Pulse includes a robust admin panel that offers comprehensive monitoring and control over medical center activities. Administrators can track key metrics, manage staff workflows, and analyze operational data to drive continuous improvement in service delivery and patient satisfaction.
-Overall, Patient Pulse represents a significant advancement in Ayurvedic healthcare management, aimed at fostering a patient-centric approach while empowering healthcare providers with advanced technological tools to deliver high-quality care efficiently.
+Designed and developed an AI-powered enterprise observability platform that enhances browser synthetic monitoring through intelligent automation, explainable AI, and predictive analytics. ObservaX continuously monitors web applications using AI-driven synthetic agents, detects performance anomalies, broken links, DOM changes, browser errors, and latency issues, and provides real-time observability insights through interactive dashboards. The platform integrates Reinforcement Learning-based agents for adaptive monitoring, Natural Language Processing (NLP) for automated incident diagnosis, and vector-based historical incident intelligence using Neo4j to generate contextual root cause analysis, remediation recommendations, and preventive actions. The system features intelligent alert orchestration, anomaly detection, self-healing monitoring workflows, historical trend analysis, and AI-generated operational insights to reduce manual debugging efforts and improve enterprise application reliability.
+
 
 <br>
 
@@ -94,19 +82,9 @@ Overall, Patient Pulse represents a significant advancement in Ayurvedic healthc
 
 <br>
 
-## Arduino System
-
-<table border="0">
-  <tr>
-    <td><img src="https://github.com/avishkasrimal01/PatientPulse-Smart-Medical-Clinic-Management-System/blob/main/images/1.jpg" height="320" width="240" ></td>
-    <td><img src="https://github.com/avishkasrimal01/PatientPulse-Smart-Medical-Clinic-Management-System/blob/main/images/2.jpg" height="320" width="240" ></td>
-    <td><img src="https://github.com/avishkasrimal01/PatientPulse-Smart-Medical-Clinic-Management-System/blob/main/images/3.jpg" height="240" width="320" ></td>
-  </tr>
-</table><br>
 
 ## Web Application
 
-### Admin Web Link : 
-### Client Web Link : https://new-web-pp-front.vercel.app/
+### Web Link : https://observa-x-frontend-3b3n.vercel.app/
 
 
